@@ -4,6 +4,7 @@ import { API_HASH, API_ID } from './env.js'
 import { v4 as uuidv4 } from 'uuid'
 import { getRandomFingerprint } from './util/fingerprint.js'
 import { storage } from './index.js'
+import { hamsterKombatService } from './api/hamster-kombat-service.js'
 
 export async function setupNewAccount(firstTime = false) {
     const authMethodResponse = await enquirer.prompt<{
@@ -121,30 +122,26 @@ async function exchangeTelegramForHamster(
         url: 'https://hamsterkombat.io/',
     })
 
-    const tgWebData = decodeURIComponent(
+    const initDataRaw = decodeURIComponent(
         result.url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0]
     )
     const fingerprint = getRandomFingerprint()
 
-    const hamsterTokenResult = await fetch(
-        'https://api.hamsterkombat.io/auth/auth-by-telegram-webapp',
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                initDataRaw: tgWebData,
-                fingerprint,
-            }),
-        }
-    )
+    const {
+        data: { authToken },
+    } = await hamsterKombatService.authByTelegramWebApp({
+        initDataRaw,
+        fingerprint,
+    })
 
     storage.update(async (data) => {
-        data.accounts.push({
-            clientName,
-            token: (await hamsterTokenResult.json()).authToken,
-            fingerprint,
-        })
+        data.accounts = {
+            ...data.accounts,
+            [clientName]: {
+                clientName,
+                fingerprint,
+                token: authToken,
+            },
+        }
     })
 }

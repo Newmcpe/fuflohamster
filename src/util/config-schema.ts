@@ -1,7 +1,7 @@
 import { Fingerprint } from './fingerprint.js'
 
 export type Config = {
-    accounts: HamsterAccount[]
+    accounts: Record<string, HamsterAccount>
 }
 
 type HamsterAccount = {
@@ -11,5 +11,5 @@ type HamsterAccount = {
 }
 
 export const defaultConfig: Config = {
-    accounts: [],
+    accounts: {},
 }
