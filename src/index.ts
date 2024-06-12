@@ -1,8 +1,8 @@
-import { JSONFileSyncPreset } from 'lowdb/node'
-import { Config, defaultConfig } from './util/config-schema.js'
-import { setupNewAccount } from './onboarding.js'
 import enquirer from 'enquirer'
-import { hamsterKombatService } from './api/hamster-kombat-service.js'
+import { JSONFileSyncPreset } from 'lowdb/node'
+import { setupNewAccount } from './onboarding.js'
+import { Config, defaultConfig } from './util/config-schema.js'
+import { startHeartbeat } from './modules/heartbeat.js'
 
 export const storage = JSONFileSyncPreset<Config>('config.json', defaultConfig)
 
@@ -31,13 +31,7 @@ const menuResponse = await enquirer.prompt<{
 
 switch (menuResponse.action) {
     case 'run':
-        console.log(
-            await hamsterKombatService.getMeTelegram(
-                'Bearer ' +
-                    storage.data.accounts[Object.keys(storage.data.accounts)[0]]
-                        .token
-            )
-        )
+        await startHeartbeat()
         break
     case 'add':
         await setupNewAccount()

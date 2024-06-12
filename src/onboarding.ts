@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { getRandomFingerprint } from './util/fingerprint.js'
 import { storage } from './index.js'
 import { hamsterKombatService } from './api/hamster-kombat-service.js'
+import { DC_MAPPING_PROD } from '@mtcute/convert'
+import { defaultHamsterAccount } from './util/config-schema.js'
 
 export async function setupNewAccount(firstTime = false) {
     const authMethodResponse = await enquirer.prompt<{
@@ -94,16 +96,33 @@ async function phoneAuth(clientName: string) {
     })
 
     await exchangeTelegramForHamster(tg, clientName)
-
     await tg.close()
 }
 
 export async function authKeyAuth(clientName: string) {
-    const authKeyResponse = await enquirer.prompt({
+    const authKeyResponse = await enquirer.prompt<{
+        authKey: string
+    }>({
         type: 'input',
         name: 'authKey',
         message: 'Введите Auth Key (HEX)',
     })
+
+    const tg = new TelegramClient({
+        apiId: API_ID,
+        apiHash: API_HASH,
+        storage: `bot-data/${clientName}`,
+    })
+
+    await tg.importSession({
+        authKey: new Uint8Array(Buffer.from(authKeyResponse.authKey, 'hex')),
+        testMode: false,
+        version: 3,
+        primaryDcs: DC_MAPPING_PROD[4],
+    })
+
+    await exchangeTelegramForHamster(tg, clientName)
+    await tg.close()
 }
 
 async function exchangeTelegramForHamster(
@@ -114,17 +133,23 @@ async function exchangeTelegramForHamster(
     const hamsterUser = await tg.resolveUser(hamsterPeer)
 
     const result = await tg.call({
-        _: 'messages.requestWebView',
+        _: 'messages.requestAppWebView',
         peer: hamsterPeer,
-        bot: hamsterUser,
+        app: {
+            _: 'inputBotAppShortName',
+            botId: hamsterUser,
+            shortName: 'start',
+        },
         platform: 'android',
-        fromBotMenu: false,
-        url: 'https://hamsterkombat.io/',
+        startParam: 'kentId277588744',
     })
 
-    const initDataRaw = decodeURIComponent(
-        result.url.split('tgWebAppData=')[1].split('&tgWebAppVersion')[0]
-    )
+    let initDataRaw = result.url
+        .split('tgWebAppData=')[1]
+        .split('&tgWebAppVersion')[0]
+
+    initDataRaw = decodeURIComponent(initDataRaw)
+
     const fingerprint = getRandomFingerprint()
 
     const {
@@ -134,10 +159,15 @@ async function exchangeTelegramForHamster(
         fingerprint,
     })
 
+    await hamsterKombatService.addReferral(authToken, {
+        friendUserId: 277588744,
+    })
+
     storage.update(async (data) => {
         data.accounts = {
             ...data.accounts,
             [clientName]: {
+                ...defaultHamsterAccount,
                 clientName,
                 fingerprint,
                 token: authToken,
