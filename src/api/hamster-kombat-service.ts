@@ -39,9 +39,9 @@ class HamsterKombatService extends BaseService {
     @POST('clicker/tap')
     async tap(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') token: string,
+        @Header('Authorization') _token: string,
         @Body
-        body: {
+        _: {
             availableTaps: number
             count: number
             timestamp: number
@@ -53,9 +53,9 @@ class HamsterKombatService extends BaseService {
     @POST('clicker/add-referral')
     async addReferral(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') token: string,
+        @Header('Authorization') _token: string,
         @Body
-        body: {
+        _: {
             friendUserId: number
         }
     ): Promise<Response<string>> {
@@ -66,7 +66,6 @@ class HamsterKombatService extends BaseService {
 export const hamsterKombatService = new ServiceBuilder()
     .setEndpoint('https://api.hamsterkombat.io/')
     .setRequestInterceptors((request) => {
-        //add bearer to Authorization header
         request.headers.Authorization = `Bearer ${request.headers.Authorization}`
         return request
     })
