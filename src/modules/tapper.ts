@@ -5,7 +5,7 @@ import { storage } from '../index.js'
 import { dateNowInSeconds } from '../util/date.js'
 import { Color, Logger } from '@starkow/logger'
 
-const log = Logger.create('heartbeat')
+const log = Logger.create('[Heartbeat]')
 
 export async function tap(account: HamsterAccount) {
     if (!isCooldownOver('noTapsUntil', account)) return
@@ -56,7 +56,7 @@ export async function tap(account: HamsterAccount) {
             Color.Green
         ),
         Logger.color('|', Color.Gray),
-        `Balance: `,
+        `Balance:`,
         Logger.color(
             response.data.clickerUser.balanceCoins.toFixed(0),
             Color.Green

@@ -61,6 +61,17 @@ class HamsterKombatService extends BaseService {
     ): Promise<Response<string>> {
         return {} as Response<string>
     }
+
+    @POST('clicker/select-exchange')
+    async selectExchange(
+        @Header('Authorization') _token: string,
+        @Body
+        _: {
+            exchangeId: string
+        }
+    ): Promise<Response<string>> {
+        return {} as Response<string>
+    }
 }
 
 export const hamsterKombatService = new ServiceBuilder()

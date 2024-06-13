@@ -42,7 +42,7 @@ export async function setupNewAccount(firstTime = false) {
 
     switch (authMethodResponse.authMethod) {
         case 'authkey':
-            await authKeyAuth(authMethodResponse.clientName)
+            await authKeyAuthPrompt(authMethodResponse.clientName)
             break
         case 'phone':
             await phoneAuth(authMethodResponse.clientName)
@@ -95,11 +95,19 @@ async function phoneAuth(clientName: string) {
         },
     })
 
-    await exchangeTelegramForHamster(tg, clientName)
+    const { referrer } = await enquirer.prompt<{
+        referrer: number
+    }>({
+        type: 'input',
+        name: 'referrer',
+        message: 'Введите ID реферовода',
+    })
+
+    await exchangeTelegramForHamster(tg, clientName, referrer)
     await tg.close()
 }
 
-export async function authKeyAuth(clientName: string) {
+export async function authKeyAuthPrompt(clientName: string) {
     const authKeyResponse = await enquirer.prompt<{
         authKey: string
     }>({
@@ -108,6 +116,10 @@ export async function authKeyAuth(clientName: string) {
         message: 'Введите Auth Key (HEX)',
     })
 
+    await authKeyAuth(clientName, authKeyResponse.authKey)
+}
+
+export async function authKeyAuth(clientName: string, authKey: string) {
     const tg = new TelegramClient({
         apiId: API_ID,
         apiHash: API_HASH,
@@ -115,19 +127,22 @@ export async function authKeyAuth(clientName: string) {
     })
 
     await tg.importSession({
-        authKey: new Uint8Array(Buffer.from(authKeyResponse.authKey, 'hex')),
+        authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
         testMode: false,
         version: 3,
-        primaryDcs: DC_MAPPING_PROD[4],
+        primaryDcs: DC_MAPPING_PROD[1],
     })
 
-    await exchangeTelegramForHamster(tg, clientName)
     await tg.close()
+
+    console.log(`${clientName} | ${authKey} Auth key imported successfully`)
 }
 
-async function exchangeTelegramForHamster(
+export async function exchangeTelegramForHamster(
     tg: TelegramClient,
-    clientName: string
+    clientName: string,
+    referrer: number,
+    addToStorage = false
 ) {
     const hamsterPeer = await tg.resolvePeer('hamster_kombat_bot')
     const hamsterUser = await tg.resolveUser(hamsterPeer)
@@ -141,7 +156,7 @@ async function exchangeTelegramForHamster(
             shortName: 'start',
         },
         platform: 'android',
-        startParam: 'kentId277588744',
+        startParam: `kentId${referrer}`,
     })
 
     let initDataRaw = result.url
@@ -160,18 +175,24 @@ async function exchangeTelegramForHamster(
     })
 
     await hamsterKombatService.addReferral(authToken, {
-        friendUserId: 277588744,
+        friendUserId: +referrer,
     })
 
-    storage.update(async (data) => {
-        data.accounts = {
-            ...data.accounts,
-            [clientName]: {
-                ...defaultHamsterAccount,
-                clientName,
-                fingerprint,
-                token: authToken,
-            },
-        }
+    await hamsterKombatService.selectExchange(authToken, {
+        exchangeId: 'bybit',
     })
+
+    if (addToStorage) {
+        storage.update(async (data) => {
+            data.accounts = {
+                ...data.accounts,
+                [clientName]: {
+                    ...defaultHamsterAccount,
+                    clientName,
+                    fingerprint,
+                    token: authToken,
+                },
+            }
+        })
+    }
 }

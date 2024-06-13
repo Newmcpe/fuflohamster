@@ -2,6 +2,7 @@ import { Fingerprint } from './fingerprint.js'
 
 export type Config = {
     accounts: Record<string, HamsterAccount>
+    referralAccounts: string[],
 }
 
 export type HamsterAccount = {
@@ -17,6 +18,7 @@ export type Cooldowns = {
 
 export const defaultConfig: Config = {
     accounts: {},
+    referralAccounts: [],
 }
 
 export const defaultHamsterAccount = {
