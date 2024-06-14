@@ -1,13 +1,13 @@
 import { HamsterAccount } from '../util/config-schema.js';
 import { hamsterKombatService } from 'api/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
-import { isCooldownOver } from 'clicker-modules/heartbeat.js';
+import { isCooldownOver, setCooldown } from 'clicker-modules/heartbeat.js';
 import { formatNumber } from 'util/number.js';
 
 const log = Logger.create('[Upgrader] ');
 
 export async function upgrader(account: HamsterAccount) {
-    if (isCooldownOver('noUpgradesUntil', account)) return;
+    if (!isCooldownOver('noUpgradesUntil', account)) return;
 
     const { data: profile } = await hamsterKombatService.getProfileData(
         account.token
@@ -68,4 +68,6 @@ export async function upgrader(account: HamsterAccount) {
             Color.Magenta
         )
     );
+
+    setCooldown('noUpgradesUntil', account, 10);
 }

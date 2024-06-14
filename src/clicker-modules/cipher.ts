@@ -18,6 +18,10 @@ export async function cipherClaimer(account: HamsterAccount) {
     const decryptedCipher = decodeCipher(dailyCipher.cipher);
     if (dailyCipher.isClaimed) return;
 
+    await hamsterKombatService.claimDailyCipher(account.token, {
+        cipher: decryptedCipher,
+    });
+
     log.info(
         Logger.color(account.clientName, Color.Cyan),
         Logger.color(' | ', Color.Gray),

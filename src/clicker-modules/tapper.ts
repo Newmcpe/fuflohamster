@@ -29,8 +29,6 @@ export async function tap(account: HamsterAccount) {
         return;
     }
 
-    console.log('availableTaps', availableTaps);
-
     const taps = Math.floor(availableTaps / 6);
 
     const {
