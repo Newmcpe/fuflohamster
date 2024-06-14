@@ -22,19 +22,13 @@
 | Управление ботом из Telegram-бота                                                 |   ⌛    |
 
 ## Запуск
+Требования:
+- [Node.js](https://nodejs.org/)
+- [pnpm](https://pnpm.io/)
+- Создать Telegram-приложение [здесь](https://my.telegram.org/)
 
 ```bash
-pnpm install --frozen-lockfile
-cp .env.example .env
-# отредактируйте .env
-node .
-```
-
-## Разработка
-
-```bash
-pnpm install --frozen-lockfile
-cp .env.example .env 
-# edit .env
+pnpm install
+copy .env.example .env # Укажите API_ID и API_HASH своего приложения в Telegram
 pnpm start
 ```
