@@ -8,8 +8,8 @@
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
         "format": "prettier --write \"src/**/*.ts\"",
-        "start": "tsc && dotenv node ./dist/index.js",
-        "build": "tsc"
+        "start": "tsc && tsc-alias && dotenv node ./dist/index.js",
+        "build": "tsc && tsc-alias"
     },
     "dependencies": {
         "@mtcute/convert": "^0.13.0",
@@ -36,10 +36,12 @@
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-ascii": "^1.0.0",
         "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-perfectionist": "^2.10.0",
         "eslint-plugin-simple-import-sort": "^12.1.0",
         "husky": "^9.0.11",
         "lint-staged": "^15.2.5",
         "prettier": "^3.3.1",
+        "tsc-alias": "^1.8.10",
         "typescript": "^5.4.5"
     }
 }

@@ -6,10 +6,15 @@ import {
     POST,
     Response,
     ServiceBuilder,
-} from 'ts-retrofit'
+} from 'ts-retrofit';
 
-import { Fingerprint } from '../util/fingerprint.js'
-import { HamsterProfile, MeTelegramResponse, TokenResponse } from './model.js'
+import { Fingerprint } from '../util/fingerprint.js';
+import {
+    AvailableUpgradesResponse,
+    HamsterProfile,
+    MeTelegramResponse,
+    TokenResponse,
+} from './model.js';
 
 @BasePath('')
 class HamsterKombatService extends BaseService {
@@ -17,7 +22,7 @@ class HamsterKombatService extends BaseService {
     async authByTelegramWebApp(
         @Body _body: { initDataRaw: string; fingerprint: Fingerprint }
     ): Promise<Response<TokenResponse>> {
-        return {} as Response<TokenResponse>
+        return {} as Response<TokenResponse>;
     }
 
     @POST('auth/me-telegram')
@@ -25,15 +30,15 @@ class HamsterKombatService extends BaseService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         @Header('Authorization') _token: string
     ): Promise<Response<MeTelegramResponse>> {
-        return {} as Response<MeTelegramResponse>
+        return {} as Response<MeTelegramResponse>;
     }
 
-    @POST('clicker/sync')
+    @POST('clicker/sync', {})
     async getProfileData(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         @Header('Authorization') _token: string
     ): Promise<Response<HamsterProfile>> {
-        return {} as Response<HamsterProfile>
+        return {} as Response<HamsterProfile>;
     }
 
     @POST('clicker/tap')
@@ -42,12 +47,12 @@ class HamsterKombatService extends BaseService {
         @Header('Authorization') _token: string,
         @Body
         _: {
-            availableTaps: number
-            count: number
-            timestamp: number
+            availableTaps: number;
+            count: number;
+            timestamp: number;
         }
     ): Promise<Response<HamsterProfile>> {
-        return {} as Response<HamsterProfile>
+        return {} as Response<HamsterProfile>;
     }
 
     @POST('clicker/add-referral')
@@ -56,10 +61,10 @@ class HamsterKombatService extends BaseService {
         @Header('Authorization') _token: string,
         @Body
         _: {
-            friendUserId: number
+            friendUserId: number;
         }
     ): Promise<Response<string>> {
-        return {} as Response<string>
+        return {} as Response<string>;
     }
 
     @POST('clicker/select-exchange')
@@ -67,17 +72,37 @@ class HamsterKombatService extends BaseService {
         @Header('Authorization') _token: string,
         @Body
         _: {
-            exchangeId: string
+            exchangeId: string;
         }
     ): Promise<Response<string>> {
-        return {} as Response<string>
+        return {} as Response<string>;
+    }
+
+    @POST('clicker/upgrades-for-buy')
+    async getUpgradesForBuy(
+        @Header('Authorization') _token: string
+    ): Promise<Response<AvailableUpgradesResponse>> {
+        return {} as Response<AvailableUpgradesResponse>;
+    }
+
+    @POST('clicker/buy-upgrade')
+    async buyUpgrade(
+        @Header('Authorization') _token: string,
+        @Body
+        _: {
+            timestamp: number;
+            upgradeId: string;
+        }
+    ): Promise<Response<AvailableUpgradesResponse>> {
+        return {} as Response<AvailableUpgradesResponse>;
     }
 }
 
 export const hamsterKombatService = new ServiceBuilder()
     .setEndpoint('https://api.hamsterkombat.io/')
     .setRequestInterceptors((request) => {
-        request.headers.Authorization = `Bearer ${request.headers.Authorization}`
-        return request
+        request.headers.Authorization = `Bearer ${request.headers.Authorization}`;
+        return request;
     })
-    .build(HamsterKombatService)
+    .setStandalone(true)
+    .build(HamsterKombatService);

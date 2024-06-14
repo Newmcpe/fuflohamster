@@ -11,10 +11,17 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "strict": true,
+        "baseUrl": "src",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "incremental": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "paths": {
+            "": [
+                "node_modules/*",
+                "src/*"
+            ],
+        }
     },
     "include": [
         "./src"

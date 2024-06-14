@@ -1,17 +1,17 @@
-import enquirer from 'enquirer'
-import { TelegramClient } from '@mtcute/node'
-import { API_HASH, API_ID } from './env.js'
-import { v4 as uuidv4 } from 'uuid'
-import { getRandomFingerprint } from './util/fingerprint.js'
-import { storage } from './index.js'
-import { hamsterKombatService } from './api/hamster-kombat-service.js'
-import { DC_MAPPING_PROD } from '@mtcute/convert'
-import { defaultHamsterAccount } from './util/config-schema.js'
+import enquirer from 'enquirer';
+import { TelegramClient } from '@mtcute/node';
+import { API_HASH, API_ID } from './env.js';
+import { v4 as uuidv4 } from 'uuid';
+import { getRandomFingerprint } from './util/fingerprint.js';
+import { storage } from './index.js';
+import { hamsterKombatService } from './api/hamster-kombat-service.js';
+import { DC_MAPPING_PROD } from '@mtcute/convert';
+import { defaultHamsterAccount } from './util/config-schema.js';
 
 export async function setupNewAccount(firstTime = false) {
     const authMethodResponse = await enquirer.prompt<{
-        authMethod: 'authkey' | 'phone'
-        clientName: string
+        authMethod: 'authkey' | 'phone';
+        clientName: string;
     }>([
         {
             type: 'input',
@@ -36,19 +36,19 @@ export async function setupNewAccount(firstTime = false) {
                 },
             ],
         },
-    ])
+    ]);
 
-    console.log(authMethodResponse)
+    console.log(authMethodResponse);
 
     switch (authMethodResponse.authMethod) {
         case 'authkey':
-            await authKeyAuthPrompt(authMethodResponse.clientName)
-            break
+            await authKeyAuthPrompt(authMethodResponse.clientName);
+            break;
         case 'phone':
-            await phoneAuth(authMethodResponse.clientName)
-            break
+            await phoneAuth(authMethodResponse.clientName);
+            break;
         default:
-            throw new Error('Unknown auth method')
+            throw new Error('Unknown auth method');
     }
 }
 
@@ -57,66 +57,58 @@ async function phoneAuth(clientName: string) {
         apiId: API_ID,
         apiHash: API_HASH,
         storage: `bot-data/${clientName}`,
-    })
+    });
 
     await tg.start({
         phone: async () => {
             const phoneResponse = await enquirer.prompt<{
-                phone: string
+                phone: string;
             }>({
                 type: 'input',
                 name: 'phone',
                 message: '📞 Введите номер телефона',
-            })
+            });
 
-            return phoneResponse.phone
+            return phoneResponse.phone;
         },
         code: async () => {
             const codeResponse = await enquirer.prompt<{
-                code: string
+                code: string;
             }>({
                 type: 'input',
                 name: 'code',
                 message: '💬 Введите код из СМС',
-            })
+            });
 
-            return codeResponse.code
+            return codeResponse.code;
         },
         password: async () => {
             const passwordResponse = await enquirer.prompt<{
-                password: string
+                password: string;
             }>({
                 type: 'input',
                 name: 'password',
                 message: '🔑 Введите пароль',
-            })
+            });
 
-            return passwordResponse.password
+            return passwordResponse.password;
         },
-    })
+    });
 
-    const { referrer } = await enquirer.prompt<{
-        referrer: number
-    }>({
-        type: 'input',
-        name: 'referrer',
-        message: 'Введите ID реферовода',
-    })
-
-    await exchangeTelegramForHamster(tg, clientName, referrer)
-    await tg.close()
+    await exchangeTelegramForHamster(tg, clientName, undefined, true);
+    await tg.close();
 }
 
 export async function authKeyAuthPrompt(clientName: string) {
     const authKeyResponse = await enquirer.prompt<{
-        authKey: string
+        authKey: string;
     }>({
         type: 'input',
         name: 'authKey',
         message: 'Введите Auth Key (HEX)',
-    })
+    });
 
-    await authKeyAuth(clientName, authKeyResponse.authKey)
+    await authKeyAuth(clientName, authKeyResponse.authKey);
 }
 
 export async function authKeyAuth(clientName: string, authKey: string) {
@@ -124,28 +116,28 @@ export async function authKeyAuth(clientName: string, authKey: string) {
         apiId: API_ID,
         apiHash: API_HASH,
         storage: `bot-data/${clientName}`,
-    })
+    });
 
     await tg.importSession({
         authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
         testMode: false,
         version: 3,
         primaryDcs: DC_MAPPING_PROD[1],
-    })
+    });
 
-    await tg.close()
+    await tg.close();
 
-    console.log(`${clientName} | ${authKey} Auth key imported successfully`)
+    console.log(`${clientName} | ${authKey} Auth key imported successfully`);
 }
 
 export async function exchangeTelegramForHamster(
     tg: TelegramClient,
     clientName: string,
-    referrer: number,
-    addToStorage = false
+    referrer?: number,
+    saveToStorage = false
 ) {
-    const hamsterPeer = await tg.resolvePeer('hamster_kombat_bot')
-    const hamsterUser = await tg.resolveUser(hamsterPeer)
+    const hamsterPeer = await tg.resolvePeer('hamster_kombat_bot');
+    const hamsterUser = await tg.resolveUser(hamsterPeer);
 
     const result = await tg.call({
         _: 'messages.requestAppWebView',
@@ -157,32 +149,34 @@ export async function exchangeTelegramForHamster(
         },
         platform: 'android',
         startParam: `kentId${referrer}`,
-    })
+    });
 
     let initDataRaw = result.url
         .split('tgWebAppData=')[1]
-        .split('&tgWebAppVersion')[0]
+        .split('&tgWebAppVersion')[0];
 
-    initDataRaw = decodeURIComponent(initDataRaw)
+    initDataRaw = decodeURIComponent(initDataRaw);
 
-    const fingerprint = getRandomFingerprint()
+    const fingerprint = getRandomFingerprint();
 
     const {
         data: { authToken },
     } = await hamsterKombatService.authByTelegramWebApp({
         initDataRaw,
         fingerprint,
-    })
+    });
 
-    await hamsterKombatService.addReferral(authToken, {
-        friendUserId: +referrer,
-    })
+    if (referrer) {
+        await hamsterKombatService.addReferral(authToken, {
+            friendUserId: +referrer,
+        });
 
-    await hamsterKombatService.selectExchange(authToken, {
-        exchangeId: 'bybit',
-    })
+        await hamsterKombatService.selectExchange(authToken, {
+            exchangeId: 'bybit',
+        });
+    }
 
-    if (addToStorage) {
+    if (saveToStorage) {
         storage.update(async (data) => {
             data.accounts = {
                 ...data.accounts,
@@ -192,7 +186,7 @@ export async function exchangeTelegramForHamster(
                     fingerprint,
                     token: authToken,
                 },
-            }
-        })
+            };
+        });
     }
 }
