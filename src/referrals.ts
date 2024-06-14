@@ -49,44 +49,56 @@ export async function addReferals() {
     });
 
     const referralAccounts = storage.data.referralAccounts.slice(-count);
+    let success = 0;
 
     for (const clientName of referralAccounts) {
-        log.info(
-            Logger.color(clientName, Color.Yellow),
-            Logger.color(' | ', Color.Gray),
-            Logger.color('Регистрирую по рефералке UserID', Color.Green),
-            Logger.color(targetId, Color.Yellow)
-        );
+        try {
+            log.info(
+                Logger.color(clientName, Color.Yellow),
+                Logger.color(' | ', Color.Gray),
+                Logger.color('Регистрирую по рефералке UserID', Color.Green),
+                Logger.color(targetId, Color.Yellow)
+            );
 
-        const tg = new TelegramClient({
-            apiId: API_ID,
-            apiHash: API_HASH,
-            storage: `bot-data/${clientName}`,
-        });
+            const tg = new TelegramClient({
+                apiId: API_ID,
+                apiHash: API_HASH,
+                storage: `bot-data/${clientName}`,
+            });
 
-        await tg.start();
+            await tg.start();
 
-        await exchangeTelegramForHamster(tg, clientName, +targetId);
-        await tg.close();
+            await exchangeTelegramForHamster(tg, clientName, +targetId);
+            await tg.close();
 
-        log.info(
-            Logger.color(clientName, Color.Yellow),
-            Logger.color(' | ', Color.Gray),
-            Logger.color('Успешно зарегался по рефералке UserID', Color.Green),
-            Logger.color(targetId, Color.Yellow)
-        );
+            log.info(
+                Logger.color(clientName, Color.Yellow),
+                Logger.color(' | ', Color.Gray),
+                Logger.color(
+                    'Успешно зарегался по рефералке UserID',
+                    Color.Green
+                ),
+                Logger.color(targetId, Color.Yellow)
+            );
 
-        await new Promise((resolve) => setTimeout(resolve, 750));
+            success++;
+            await new Promise((resolve) => setTimeout(resolve, 750));
+        } catch (e) {
+            log.error(
+                Logger.color(clientName, Color.Yellow),
+                Logger.color(' | ', Color.Gray),
+                Logger.color('Ошибка:', Color.Red),
+                e
+            );
+        }
     }
-
     log.info(
-        Logger.color('Добавлено', Color.Green),
+        Logger.color(success.toString(), Color.Green),
         Logger.color(count.toString(), Color.Yellow),
         Logger.color('рефералов', Color.Green),
         Logger.color('для ', Color.Green),
         Logger.color(targetId, Color.Yellow)
     );
-
     storage.update((data) => {
         data.referralAccounts = data.referralAccounts.slice(0, -count);
         return data;

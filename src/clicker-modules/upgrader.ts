@@ -1,10 +1,14 @@
 import { HamsterAccount } from '../util/config-schema.js';
 import { hamsterKombatService } from 'api/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
+import { isCooldownOver } from 'clicker-modules/heartbeat.js';
+import { formatNumber } from 'util/number.js';
 
 const log = Logger.create('[Upgrader] ');
 
 export async function upgrader(account: HamsterAccount) {
+    if (isCooldownOver('noUpgradesUntil', account)) return;
+
     const { data: profile } = await hamsterKombatService.getProfileData(
         account.token
     );
@@ -32,12 +36,12 @@ export async function upgrader(account: HamsterAccount) {
 
     if (profile.clickerUser.balanceCoins < bestUpgrade!.price) return;
 
-    upgradesForBuy = (
-        await hamsterKombatService.buyUpgrade(account.token, {
-            timestamp: Date.now(),
-            upgradeId: bestUpgrade!.id,
-        })
-    ).data.upgradesForBuy;
+    await hamsterKombatService.buyUpgrade(account.token, {
+        timestamp: Date.now(),
+        upgradeId: bestUpgrade!.id,
+    });
+
+    profile.clickerUser.balanceCoins -= bestUpgrade!.price;
 
     log.info(
         Logger.color(account.clientName, Color.Cyan),
@@ -51,16 +55,16 @@ export async function upgrader(account: HamsterAccount) {
         `уровня |\n`,
         `Заработок каждый час:`,
         Logger.color(
-            (
+            formatNumber(
                 bestUpgrade!.profitPerHourDelta +
-                profile.clickerUser.earnPassivePerHour
-            ).toFixed(2),
+                    profile.clickerUser.earnPassivePerHour
+            ),
             Color.Magenta
         ),
         Logger.color(`(+${bestUpgrade!.profitPerHourDelta})\n`, Color.Green),
         Logger.color(`Осталось денег:`, Color.Green),
         Logger.color(
-            (profile.clickerUser.balanceCoins - bestUpgrade!.price).toFixed(2),
+            formatNumber(profile.clickerUser.balanceCoins),
             Color.Magenta
         )
     );

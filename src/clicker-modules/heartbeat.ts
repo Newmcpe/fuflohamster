@@ -5,6 +5,9 @@ import { dateNowInSeconds } from '../util/date.js';
 import { hamsterKombatService } from '../api/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 import { upgrader } from 'clicker-modules/upgrader.js';
+import { cipherClaimer } from 'clicker-modules/cipher.js';
+import { dailyComboClaimer } from 'clicker-modules/daily-combo.js';
+import { formatNumber } from 'util/number.js';
 
 const log = Logger.create('[HEARTBEAT]');
 
@@ -19,13 +22,13 @@ export async function startHeartbeat() {
             Logger.color(' | ', Color.Gray),
             'Последний пассивный заработок:',
             Logger.color(
-                `${clickerUser.lastPassiveEarn.toFixed(1)} 🪙`,
+                `${formatNumber(clickerUser.lastPassiveEarn)} 🪙`,
                 Color.Green
             ),
             Logger.color(' | ', Color.Gray),
             'Доход:',
             Logger.color(
-                `${clickerUser.earnPassivePerHour.toFixed(1)} 🪙/ч.`,
+                `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.`,
                 Color.Green
             ),
             Logger.color(' | ', Color.Gray),
@@ -41,7 +44,9 @@ export async function startHeartbeat() {
 
 async function accountHeartbeat(account: HamsterAccount) {
     await tap(account);
+    await dailyComboClaimer(account);
     await upgrader(account);
+    await cipherClaimer(account);
 }
 
 export function isCooldownOver(

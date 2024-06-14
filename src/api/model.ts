@@ -93,4 +93,117 @@ export type AvailableUpgradesResponse = {
         isExpired: boolean;
         totalCooldownSeconds: number;
     }[];
+    dailyCombo: {
+        upgradeIds: string[];
+        bonusCoins: number;
+        isClaimed: boolean;
+        remainSeconds: number;
+    };
+};
+
+export type ClickerGameConfig = {
+    clickerConfig: {
+        guidLink: {
+            ru: string;
+            en: string;
+            latam: string;
+            uz: string;
+            vn: string;
+            br: string;
+        };
+        maxPassiveDtSeconds: number;
+        userLevels_balanceCoins: Array<{
+            level: number;
+            coinsToLeveUp: number | null;
+        }>;
+        boosts: Array<{
+            id: string;
+            price: number;
+            earnPerTap: number;
+            maxTaps: number;
+            maxLevel?: number;
+            cooldownSeconds?: number;
+        }>;
+        tasks: Array<{
+            id: string;
+            rewardCoins: number;
+            periodicity: 'Once' | 'Repeatedly';
+            link?: string;
+            channelId?: number;
+            rewardsByDays?: Array<{
+                days: number;
+                rewardCoins: number;
+            }>;
+        }>;
+        airdropTasks: Array<{
+            id: string;
+            rewardTickets: number;
+            periodicity: 'Once';
+        }>;
+        upgrades: Array<{
+            id: string;
+            name: string;
+            price: number;
+            profitPerHour: number;
+            condition?: {
+                _type:
+                    | 'ByUpgrade'
+                    | 'ReferralCount'
+                    | 'MoreReferralsCount'
+                    | 'LinkWithoutCheck'
+                    | 'LinksToUpgradeLevel'
+                    | 'SubscribeTelegramChannel';
+                upgradeId?: string;
+                level?: number;
+                referralCount?: number;
+                moreReferralsCount?: number;
+                subscribeLink?: string;
+                links?: string[];
+                link?: string;
+                channelId?: number;
+            };
+            section: string;
+            cooldownSeconds?: Array<{
+                level: number;
+                cooldownSeconds: number;
+            }>;
+            maxLevel?: number;
+            expiresAt?: string;
+            welcomeCoins?: number;
+        }>;
+        levelUp: {
+            maxTaps: number;
+            earnPerTap: number;
+        };
+        referral: {
+            base: {
+                welcome: number;
+                levelUp: { [level: string]: number };
+            };
+            premium: {
+                welcome: number;
+                levelUp: { [level: string]: number };
+            };
+        };
+        exchanges: Array<{
+            id: string;
+            name: string;
+            players: number;
+            bonus: number;
+        }>;
+        airdrops: Array<any>;
+        depositsUpdateCooldownSeconds: number;
+    };
+    dailyCipher: {
+        cipher: string;
+        bonusCoins: number;
+        isClaimed: boolean;
+        remainSeconds: number;
+    };
+    feature: Array<string>;
+};
+
+export type DailyCombo = {
+    combo: string[];
+    date: string;
 };

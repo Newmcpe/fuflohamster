@@ -9,7 +9,7 @@ import { DC_MAPPING_PROD } from '@mtcute/convert';
 import { defaultHamsterAccount } from './util/config-schema.js';
 
 export async function setupNewAccount(firstTime = false) {
-    const authMethodResponse = await enquirer.prompt<{
+    const { authMethod, clientName } = await enquirer.prompt<{
         authMethod: 'authkey' | 'phone';
         clientName: string;
     }>([
@@ -38,14 +38,12 @@ export async function setupNewAccount(firstTime = false) {
         },
     ]);
 
-    console.log(authMethodResponse);
-
-    switch (authMethodResponse.authMethod) {
+    switch (authMethod) {
         case 'authkey':
-            await authKeyAuthPrompt(authMethodResponse.clientName);
+            await authKeyAuthPrompt(clientName);
             break;
         case 'phone':
-            await phoneAuth(authMethodResponse.clientName);
+            await phoneAuth(clientName);
             break;
         default:
             throw new Error('Unknown auth method');

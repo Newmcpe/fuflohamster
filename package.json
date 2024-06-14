@@ -20,6 +20,7 @@
         "enquirer": "^2.4.1",
         "long": "^5.2.3",
         "lowdb": "^7.0.1",
+        "random": "^4.1.0",
         "ts-retrofit": "^1.19.0",
         "user-agents": "^1.1.231",
         "uuid": "^10.0.0"

@@ -2,7 +2,8 @@ import { HamsterAccount } from '../util/config-schema.js';
 import { hamsterKombatService } from '../api/hamster-kombat-service.js';
 import { isCooldownOver, setCooldown } from './heartbeat.js';
 import { Color, Logger } from '@starkow/logger';
-import { getRandomInt } from '../util/math.js';
+import random from 'random';
+import { formatNumber } from 'util/number.js';
 
 const log = Logger.create('[TAPPER]');
 
@@ -12,10 +13,11 @@ export async function tap(account: HamsterAccount) {
     let {
         data: { clickerUser },
     } = await hamsterKombatService.getProfileData(account.token);
+
     const availableTaps = clickerUser.availableTaps;
 
     if (availableTaps < 50) {
-        const sleepTime = getRandomInt(250, 500);
+        const sleepTime = random.int(50, 350);
         log.info(
             Logger.color(account.clientName, Color.Cyan),
             Logger.color('|', Color.Gray),
@@ -27,7 +29,7 @@ export async function tap(account: HamsterAccount) {
         return;
     }
 
-    const taps = getRandomInt(1, availableTaps / 2);
+    const taps = availableTaps / 6;
 
     const {
         data: { clickerUser: newClickerUser },
@@ -37,7 +39,7 @@ export async function tap(account: HamsterAccount) {
         timestamp: Date.now(),
     });
 
-    const sleepTime = getRandomInt(5, 25);
+    const sleepTime = random.int(5, 25);
 
     log.info(
         Logger.color(account.clientName, Color.Cyan),
@@ -48,10 +50,10 @@ export async function tap(account: HamsterAccount) {
         Logger.color(newClickerUser.availableTaps.toString(), Color.Magenta),
         'энергии.',
         'Баланс:',
-        Logger.color(newClickerUser.balanceCoins.toFixed(0), Color.Magenta),
+        Logger.color(formatNumber(newClickerUser.balanceCoins), Color.Magenta),
         '🪙',
         Logger.color(
-            `(+${(newClickerUser.balanceCoins - clickerUser.balanceCoins).toFixed(0)})`,
+            `(+${formatNumber(newClickerUser.balanceCoins - clickerUser.balanceCoins)})`,
             Color.Green
         )
     );

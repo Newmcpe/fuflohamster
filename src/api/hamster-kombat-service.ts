@@ -11,6 +11,7 @@ import {
 import { Fingerprint } from '../util/fingerprint.js';
 import {
     AvailableUpgradesResponse,
+    ClickerGameConfig,
     HamsterProfile,
     MeTelegramResponse,
     TokenResponse,
@@ -95,6 +96,24 @@ class HamsterKombatService extends BaseService {
         }
     ): Promise<Response<AvailableUpgradesResponse>> {
         return {} as Response<AvailableUpgradesResponse>;
+    }
+
+    @POST('clicker/config')
+    async getConfig(
+        @Header('Authorization') _token: string
+    ): Promise<Response<ClickerGameConfig>> {
+        return {} as Response<ClickerGameConfig>;
+    }
+
+    @POST('clicker/claim-daily-cipher')
+    async claimDailyCipher(
+        @Header('Authorization') _token: string,
+        @Body
+        _: {
+            cipher: string;
+        }
+    ): Promise<Response<ClickerGameConfig>> {
+        return {} as Response<ClickerGameConfig>;
     }
 }
 
