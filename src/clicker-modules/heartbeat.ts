@@ -19,21 +19,25 @@ export async function startHeartbeat() {
 
         log.info(
             Logger.color(account.clientName, Color.Cyan),
-            Logger.color(' | ', Color.Gray),
+            Logger.color('|', Color.Gray),
             'Последний пассивный заработок:',
             Logger.color(
                 `${formatNumber(clickerUser.lastPassiveEarn)} 🪙`,
-                Color.Green
+                Color.Magenta
             ),
-            Logger.color(' | ', Color.Gray),
+            Logger.color('|', Color.Gray),
             'Доход:',
             Logger.color(
-                `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.`,
-                Color.Green
+                `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.\n`,
+                Color.Magenta
             ),
-            Logger.color(' | ', Color.Gray),
+            Logger.color('|', Color.Gray),
+            'Баланс:',
+            Logger.color(formatNumber(clickerUser.balanceCoins), Color.Magenta),
+            '🪙',
+            Logger.color('|', Color.Gray),
             'Текущий уровень:',
-            Logger.color(clickerUser.level.toString(), Color.Green)
+            Logger.color(clickerUser.level.toString(), Color.Magenta)
         );
 
         setInterval(async () => {

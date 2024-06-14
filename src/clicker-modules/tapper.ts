@@ -14,7 +14,7 @@ export async function tap(account: HamsterAccount) {
         data: { clickerUser },
     } = await hamsterKombatService.getProfileData(account.token);
 
-    const availableTaps = clickerUser.availableTaps;
+    const availableTaps = clickerUser.availableTaps / clickerUser.earnPerTap;
 
     if (availableTaps < 50) {
         const sleepTime = random.int(50, 350);
@@ -29,7 +29,9 @@ export async function tap(account: HamsterAccount) {
         return;
     }
 
-    const taps = availableTaps / 6;
+    console.log('availableTaps', availableTaps);
+
+    const taps = Math.floor(availableTaps / 6);
 
     const {
         data: { clickerUser: newClickerUser },
@@ -40,6 +42,8 @@ export async function tap(account: HamsterAccount) {
     });
 
     const sleepTime = random.int(5, 25);
+
+    console.log('availableTaps', newClickerUser.availableTaps);
 
     log.info(
         Logger.color(account.clientName, Color.Cyan),

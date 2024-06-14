@@ -47,7 +47,7 @@ export async function dailyComboClaimer(account: HamsterAccount) {
                 Color.Magenta
             )
         );
-        setCooldown('noUpgradesUntil', account, 60);
+        setCooldown('noUpgradesUntil', account, 500);
         return;
     }
 
