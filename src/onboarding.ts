@@ -7,6 +7,8 @@ import { storage } from './index.js';
 import { hamsterKombatService } from './api/hamster-kombat-service.js';
 import { DC_MAPPING_PROD } from '@mtcute/convert';
 import { defaultHamsterAccount } from './util/config-schema.js';
+import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
+import * as process from 'node:process';
 
 export async function setupNewAccount(firstTime = false) {
     const { authMethod, clientName } = await enquirer.prompt<{
@@ -110,17 +112,36 @@ export async function authKeyAuthPrompt(clientName: string) {
 }
 
 export async function authKeyAuth(clientName: string, authKey: string) {
-    const tg = new TelegramClient({
+    let opts: {
+        apiId: number;
+        apiHash: string;
+        storage: string;
+        transport?: any;
+    } = {
         apiId: API_ID,
         apiHash: API_HASH,
         storage: `bot-data/${clientName}`,
-    });
+    };
+
+    if (process.env.PROXY_IP) {
+        opts = {
+            ...opts,
+            transport: new HttpProxyTcpTransport({
+                host: process.env.PROXY_IP,
+                port: parseInt(process.env.PROXY_PORT!),
+                user: process.env.PROXY_USER,
+                password: process.env.PROXY_PASS,
+            }),
+        };
+    }
+
+    const tg = new TelegramClient(opts);
 
     await tg.importSession({
         authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
         testMode: false,
         version: 3,
-        primaryDcs: DC_MAPPING_PROD[1],
+        primaryDcs: DC_MAPPING_PROD[4],
     });
 
     await tg.close();

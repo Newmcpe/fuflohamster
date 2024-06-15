@@ -17,6 +17,9 @@ importers:
       '@mtcute/dispatcher':
         specifier: ^0.13.0
         version: 0.13.0
+      '@mtcute/http-proxy':
+        specifier: ^0.13.0
+        version: 0.13.0
       '@mtcute/node':
         specifier: ^0.13.0
         version: 0.13.0
@@ -150,6 +153,9 @@ packages:
 
   '@mtcute/html-parser@0.13.0':
     resolution: {integrity: sha512-n7H8gFjN30V8XaUJBJsiNTlj6K8owEKIwyasVcPyPMLHqbmXshy447v6H1VIBwtgO4XtEaSOTiRX8jCbzP1hIA==}
+
+  '@mtcute/http-proxy@0.13.0':
+    resolution: {integrity: sha512-B12nK9JaJphghZrEhmm8ESwTqcH2Ufld20eny/IP+FrZfZFiTPQ0GSSOo5b0Q8RYwW4wkLD5VRKrML3DVB0aYA==}
 
   '@mtcute/markdown-parser@0.13.0':
     resolution: {integrity: sha512-yMtwXSRfWWw1mXZQtOOb/LlnwNxpZfvpzm6PvOIiyeR90euTHhdB1v+UfcITpU19yid0g2k88lWX2I5JyjVWow==}
@@ -1607,6 +1613,10 @@ snapshots:
       '@mtcute/core': 0.13.1
       htmlparser2: 6.1.0
       long: 5.2.3
+
+  '@mtcute/http-proxy@0.13.0':
+    dependencies:
+      '@mtcute/node': 0.13.0
 
   '@mtcute/markdown-parser@0.13.0':
     dependencies:

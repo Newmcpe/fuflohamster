@@ -23,7 +23,8 @@ export async function upgrader(account: HamsterAccount) {
             !upgrade.isExpired &&
             !upgrade.cooldownSeconds &&
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
-            upgrade.price < profile.clickerUser.balanceCoins
+            upgrade.price < profile.clickerUser.balanceCoins &&
+            (!upgrade.condition || upgrade.condition._type !== 'ByUpgrade')
     );
 
     const bestUpgrade = upgradesForBuy[0];

@@ -13,36 +13,48 @@ const log = Logger.create('[HEARTBEAT]');
 
 export async function startHeartbeat() {
     for (const account of Object.values(storage.data.accounts)) {
-        const {
-            data: { clickerUser },
-        } = await hamsterKombatService.getProfileData(account.token);
+        try {
+            const {
+                data: { clickerUser },
+            } = await hamsterKombatService.getProfileData(account.token);
 
-        log.info(
-            Logger.color(account.clientName, Color.Cyan),
-            Logger.color('|', Color.Gray),
-            'Последний пассивный заработок:',
-            Logger.color(
-                `${formatNumber(clickerUser.lastPassiveEarn)} 🪙`,
-                Color.Magenta
-            ),
-            Logger.color('|', Color.Gray),
-            'Доход:',
-            Logger.color(
-                `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.\n`,
-                Color.Magenta
-            ),
-            Logger.color('|', Color.Gray),
-            'Баланс:',
-            Logger.color(formatNumber(clickerUser.balanceCoins), Color.Magenta),
-            '🪙',
-            Logger.color('|', Color.Gray),
-            'Текущий уровень:',
-            Logger.color(clickerUser.level.toString(), Color.Magenta)
-        );
+            log.info(
+                Logger.color(account.clientName, Color.Cyan),
+                Logger.color('|', Color.Gray),
+                'Последний пассивный заработок:',
+                Logger.color(
+                    `${formatNumber(clickerUser.lastPassiveEarn)} 🪙`,
+                    Color.Magenta
+                ),
+                Logger.color('|', Color.Gray),
+                'Доход:',
+                Logger.color(
+                    `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.\n`,
+                    Color.Magenta
+                ),
+                Logger.color('|', Color.Gray),
+                'Баланс:',
+                Logger.color(
+                    formatNumber(clickerUser.balanceCoins),
+                    Color.Magenta
+                ),
+                '🪙',
+                Logger.color('|', Color.Gray),
+                'Текущий уровень:',
+                Logger.color(clickerUser.level.toString(), Color.Magenta)
+            );
 
-        setInterval(async () => {
-            accountHeartbeat(account).then(() => {});
-        }, 1000);
+            setInterval(async () => {
+                accountHeartbeat(account).then(() => {});
+            }, 1000);
+        } catch (e) {
+            log.error(
+                Logger.color(account.clientName, Color.Cyan),
+                Logger.color('|', Color.Gray),
+                'Ошибка при обновлении аккаунта:',
+                e
+            );
+        }
     }
 }
 

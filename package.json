@@ -15,6 +15,7 @@
         "@mtcute/convert": "^0.13.0",
         "@mtcute/crypto-node": "^0.13.0",
         "@mtcute/dispatcher": "^0.13.0",
+        "@mtcute/http-proxy": "^0.13.0",
         "@mtcute/node": "^0.13.0",
         "@starkow/logger": "^2.3.1",
         "enquirer": "^2.4.1",

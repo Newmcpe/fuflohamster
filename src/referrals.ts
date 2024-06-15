@@ -6,6 +6,8 @@ import { Color, Logger } from '@starkow/logger';
 import { TelegramClient } from '@mtcute/node';
 import { API_HASH, API_ID } from 'env.js';
 import { storage } from 'index.js';
+import process from 'node:process';
+import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
 
 const log = Logger.create('[Referrals]');
 
@@ -60,11 +62,31 @@ export async function addReferals() {
                 Logger.color(targetId, Color.Yellow)
             );
 
-            const tg = new TelegramClient({
+            let opts: {
+                apiId: number;
+                apiHash: string;
+                storage: string;
+                transport?: any;
+            } = {
                 apiId: API_ID,
                 apiHash: API_HASH,
                 storage: `bot-data/${clientName}`,
-            });
+            };
+
+            if (process.env.PROXY_IP) {
+                opts = {
+                    ...opts,
+                    transport: () =>
+                        new HttpProxyTcpTransport({
+                            host: process.env.PROXY_IP!,
+                            port: parseInt(process.env.PROXY_PORT!),
+                            user: process.env.PROXY_USER,
+                            password: process.env.PROXY_PASS,
+                        }),
+                };
+            }
+
+            const tg = new TelegramClient(opts);
 
             await tg.start();
 
