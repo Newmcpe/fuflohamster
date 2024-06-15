@@ -29,7 +29,7 @@ export async function tap(account: HamsterAccount) {
         return;
     }
 
-    const taps = Math.floor(availableTaps / 6);
+    const taps = Math.floor(availableTaps / 3);
 
     const {
         data: { clickerUser: newClickerUser },

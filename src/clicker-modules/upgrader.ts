@@ -17,24 +17,31 @@ export async function upgrader(account: HamsterAccount) {
         data: { upgradesForBuy },
     } = await hamsterKombatService.getUpgradesForBuy(account.token);
 
-    const bestUpgrade = upgradesForBuy
-        .filter(
-            (upgrade) =>
-                upgrade.isAvailable &&
-                !upgrade.isExpired &&
-                upgrade.cooldownSeconds == 0 &&
-                (upgrade.maxLevel ?? upgrade.level) >= upgrade.level &&
-                (!upgrade.condition ||
-                    upgrade.condition._type != 'SubscribeTelegramChannel')
-        )
-        .sort((a, b) => {
-            return (
-                b.profitPerHourDelta / b.price - a.profitPerHourDelta / a.price
-            );
-        })
-        .shift();
+    upgradesForBuy = upgradesForBuy.filter(
+        (upgrade) =>
+            upgrade.isAvailable &&
+            !upgrade.isExpired &&
+            !upgrade.cooldownSeconds &&
+            (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
+            upgrade.price < profile.clickerUser.balanceCoins
+    );
 
-    if (profile.clickerUser.balanceCoins < bestUpgrade!.price) return;
+    const bestUpgrade = upgradesForBuy[0];
+
+    if (!bestUpgrade) {
+        log.info(
+            Logger.color(account.clientName, Color.Cyan),
+            Logger.color(' | ', Color.Gray),
+            `Нет доступных улучшений`
+        );
+        setCooldown('noUpgradesUntil', account, 50);
+        return;
+    }
+
+    if (profile.clickerUser.balanceCoins < bestUpgrade!.price) {
+        setCooldown('noUpgradesUntil', account, 60);
+        return;
+    }
 
     await hamsterKombatService.buyUpgrade(account.token, {
         timestamp: Date.now(),

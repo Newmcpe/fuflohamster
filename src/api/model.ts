@@ -78,11 +78,11 @@ export type AvailableUpgradesResponse = {
         name: string;
         price: number;
         profitPerHour: number;
-        condition?: {
+        condition: {
             _type: string;
             link: string;
             channelId: number;
-        };
+        } | null;
         cooldownSeconds?: number;
         section: string;
         level: number;
