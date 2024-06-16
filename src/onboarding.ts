@@ -141,7 +141,7 @@ export async function authKeyAuth(clientName: string, authKey: string) {
         authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
         testMode: false,
         version: 3,
-        primaryDcs: DC_MAPPING_PROD[4],
+        primaryDcs: DC_MAPPING_PROD[1],
     });
 
     await tg.close();

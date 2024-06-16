@@ -32,9 +32,9 @@ export async function setupReferralAccounts() {
         console.log(
             `Successfully added ${lines.length} accounts to referralAccounts`
         );
-    });
 
-    fs.rmSync('availableaccounts.txt');
+        fs.writeFileSync('availableaccounts.txt', '');
+    });
 }
 
 export async function addReferals() {
