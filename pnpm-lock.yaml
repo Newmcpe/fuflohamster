@@ -38,9 +38,9 @@ importers:
       random:
         specifier: ^4.1.0
         version: 4.1.0
-      ts-retrofit:
-        specifier: ^1.19.0
-        version: 1.19.0
+      ts-retrofit3:
+        specifier: ^2.10.21
+        version: 2.10.21
       user-agents:
         specifier: ^1.1.231
         version: 1.1.231
@@ -342,8 +342,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@0.21.4:
-    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
+  axios@0.27.2:
+    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -749,9 +749,9 @@ packages:
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
 
-  form-data@2.5.1:
-    resolution: {integrity: sha512-m21N3WOmEEURgk6B9GLOE4RuWOFf28Lhh9qGYeNlGq4VDXUlJy2th2slBNU8Gp8EzloYZOibZJ7t5ecIrFSjVA==}
-    engines: {node: '>= 0.12'}
+  form-data@4.0.0:
+    resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
+    engines: {node: '>= 6'}
 
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
@@ -1450,8 +1450,8 @@ packages:
     peerDependencies:
       typescript: '>=4.2.0'
 
-  ts-retrofit@1.19.0:
-    resolution: {integrity: sha512-wsDq42MpD5pPvRvv1YTgKjwegv1ryIPl7VCIG/LUBqWfSkqABJtA5Iw07EeJhwuRP/npcVrygFy0sTTiRypEog==}
+  ts-retrofit3@2.10.21:
+    resolution: {integrity: sha512-w1/fXszFmc4e2Lg1A8Ium8k8otWcjWwT3MxvKmocQDBhfwsyVS0cpjcXI+HXKxMRaRuKHUQvzax53rFTmIrlNw==}
 
   tsc-alias@1.8.10:
     resolution: {integrity: sha512-Ibv4KAWfFkFdKJxnWfVtdOmB0Zi1RJVxcbPGiCDsFpCQSsmpWyuzHG3rQyI5YkobWwxFPEyQfu1hdo4qLG2zPw==}
@@ -1840,9 +1840,10 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  axios@0.21.4:
+  axios@0.27.2:
     dependencies:
       follow-redirects: 1.15.6
+      form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
@@ -2351,7 +2352,7 @@ snapshots:
     dependencies:
       is-callable: 1.2.7
 
-  form-data@2.5.1:
+  form-data@4.0.0:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
@@ -3042,10 +3043,10 @@ snapshots:
     dependencies:
       typescript: 5.4.5
 
-  ts-retrofit@1.19.0:
+  ts-retrofit3@2.10.21:
     dependencies:
-      axios: 0.21.4
-      form-data: 2.5.1
+      axios: 0.27.2
+      form-data: 4.0.0
       qs: 6.12.1
     transitivePeerDependencies:
       - debug

@@ -21,10 +21,14 @@ export async function upgrader(account: HamsterAccount) {
         (upgrade) =>
             upgrade.isAvailable &&
             !upgrade.isExpired &&
-            !upgrade.cooldownSeconds &&
+            upgrade.cooldownSeconds == 0 &&
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
             upgrade.price < profile.clickerUser.balanceCoins &&
-            (!upgrade.condition || upgrade.condition._type !== 'ByUpgrade')
+            (!upgrade.condition ||
+                (upgrade.condition._type !== 'ByUpgrade' &&
+                    (upgrade.condition._type !== 'ReferralCount' ||
+                        profile.clickerUser.referralsCount >=
+                            upgrade.condition.referralCount!)))
     );
 
     const bestUpgrade = upgradesForBuy[0];

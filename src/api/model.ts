@@ -79,6 +79,7 @@ export type AvailableUpgradesResponse = {
         price: number;
         profitPerHour: number;
         condition: {
+            referralCount?: number;
             _type: string;
             link: string;
             channelId: number;

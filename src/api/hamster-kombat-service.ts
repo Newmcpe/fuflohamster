@@ -6,7 +6,7 @@ import {
     POST,
     Response,
     ServiceBuilder,
-} from 'ts-retrofit';
+} from 'ts-retrofit3';
 
 import { Fingerprint } from '../util/fingerprint.js';
 import {
@@ -120,8 +120,8 @@ class HamsterKombatService extends BaseService {
 export const hamsterKombatService = new ServiceBuilder()
     .setEndpoint('https://api.hamsterkombat.io/')
     .setRequestInterceptors((request) => {
-        request.headers.Authorization = `Bearer ${request.headers.Authorization}`;
+        request.headers!.Authorization = `Bearer ${request.headers!!.Authorization}`;
         return request;
     })
-    .setStandalone(true)
+    .setStandalone(false)
     .build(HamsterKombatService);
