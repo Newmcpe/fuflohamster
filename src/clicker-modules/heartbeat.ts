@@ -45,7 +45,7 @@ export async function startHeartbeat() {
             );
 
             setInterval(async () => {
-                accountHeartbeat(account).then(() => {});
+                await accountHeartbeat(account);
             }, 1000);
         } catch (e) {
             log.error(
