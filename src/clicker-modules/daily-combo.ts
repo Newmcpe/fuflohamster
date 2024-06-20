@@ -62,6 +62,8 @@ export async function dailyComboClaimer(account: HamsterAccount) {
         clickerUser.balanceCoins -= upgrade.price;
     }
 
+    await hamsterKombatService.claimDailyCombo(account.token);
+
     log.info(
         Logger.color(account.clientName, Color.Cyan),
         Logger.color(' | ', Color.Gray),

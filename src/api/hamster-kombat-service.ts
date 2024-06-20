@@ -115,6 +115,13 @@ class HamsterKombatService extends BaseService {
     ): Promise<Response<ClickerGameConfig>> {
         return {} as Response<ClickerGameConfig>;
     }
+
+    @POST('clicker/claim-daily-combo')
+    async claimDailyCombo(
+        @Header('Authorization') _token: string
+    ): Promise<Response<void>> {
+        return {} as Response<void>;
+    }
 }
 
 export const hamsterKombatService = new ServiceBuilder()
