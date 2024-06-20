@@ -22,7 +22,7 @@
         "long": "^5.2.3",
         "lowdb": "^7.0.1",
         "random": "^4.1.0",
-        "ts-retrofit3": "^2.10.21",
+        "retrofit-axios-ts": "^1.0.9",
         "user-agents": "^1.1.231",
         "uuid": "^10.0.0"
     },
