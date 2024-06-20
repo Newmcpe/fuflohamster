@@ -208,3 +208,19 @@ export type DailyCombo = {
     combo: string[];
     date: string;
 };
+
+type Boost = {
+    id: string;
+    price: number;
+    earnPerTap: number;
+    maxTaps: number;
+    cooldownSeconds: number;
+    level: number;
+    maxTapsDelta: number;
+    earnPerTapDelta: number;
+    maxLevel?: number; // Optional as it only appears in one object
+};
+
+export type AvailableBoostsResponse = {
+    boostsForBuy: Boost[];
+};

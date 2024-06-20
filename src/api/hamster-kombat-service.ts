@@ -10,6 +10,7 @@ import {
 
 import { Fingerprint } from '../util/fingerprint.js';
 import {
+    AvailableBoostsResponse,
     AvailableUpgradesResponse,
     ClickerGameConfig,
     HamsterProfile,
@@ -122,6 +123,25 @@ class HamsterKombatService extends BaseService {
     ): Promise<Response<void>> {
         return {} as Response<void>;
     }
+
+    @POST('clicker/boosts-for-buy')
+    async getBoosts(
+        @Header('Authorization') _token: string
+    ): Promise<Response<AvailableBoostsResponse>> {
+        return {} as Response<AvailableBoostsResponse>;
+    }
+
+    @POST('clicker/buy-boost')
+    async applyBoost(
+        @Header('Authorization') _token: string,
+        @Body
+        _: {
+            timestamp: number;
+            boostId: string;
+        }
+    ): Promise<Response<void>> {
+        return {} as Response<void>;
+    }
 }
 
 export const hamsterKombatService = new ServiceBuilder()
@@ -135,6 +155,17 @@ export const hamsterKombatService = new ServiceBuilder()
         rejected: (e) => {
             console.log('Request interceptor error.');
             return Promise.reject(e);
+        },
+    })
+    .setResponseInterceptors({
+        fulfilled: (config) => {
+            config.headers!.Authorization = `Bearer ${config.headers!!.Authorization}`;
+
+            return config;
+        },
+        rejected: (e) => {
+            console.log('Request interceptor error.');
+            return Promise.resolve();
         },
     })
     .setStandalone(false)

@@ -25,8 +25,34 @@ export async function tap(account: HamsterAccount) {
             Logger.color(sleepTime.toString(), Color.Yellow),
             'секунд'
         );
-        setCooldown('noTapsUntil', account, sleepTime);
-        return;
+
+        const {
+            data: { boostsForBuy },
+        } = await hamsterKombatService.getBoosts(account.token);
+
+        const boost = boostsForBuy.find(
+            (boost) => boost.id === 'BoostFullAvailableTaps'
+        );
+
+        if (
+            boost &&
+            boost.cooldownSeconds == 0 &&
+            boost.level <= (boost.maxLevel ?? 0)
+        ) {
+            await hamsterKombatService.applyBoost(account.token, {
+                timestamp: Date.now(),
+                boostId: boost.id,
+            });
+
+            log.info(
+                Logger.color(account.clientName, Color.Cyan),
+                Logger.color(' |', Color.Gray),
+                'Активирован бустер энергии'
+            );
+        } else {
+            setCooldown('noTapsUntil', account, sleepTime);
+            return;
+        }
     }
 
     const taps = Math.floor(availableTaps / 3);
