@@ -154,7 +154,7 @@ export const hamsterKombatService = new ServiceBuilder()
         },
         rejected: (e) => {
             console.log('Request interceptor error.');
-            return Promise.reject(e);
+            return Promise.resolve();
         },
     })
     .setResponseInterceptors({
@@ -163,8 +163,8 @@ export const hamsterKombatService = new ServiceBuilder()
 
             return config;
         },
-        rejected: (e) => {
-            console.log('Request interceptor error.');
+        rejected: (e: Error) => {
+            console.log(`Request interceptor error. ${e.stack}`);
             return Promise.resolve();
         },
     })

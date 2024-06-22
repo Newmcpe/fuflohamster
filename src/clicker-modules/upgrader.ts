@@ -44,6 +44,11 @@ export async function upgrader(account: HamsterAccount) {
     }
 
     if (profile.clickerUser.balanceCoins < bestUpgrade!.price) {
+        log.info(
+            Logger.color(account.clientName, Color.Cyan),
+            Logger.color(' | ', Color.Gray),
+            `Не хватает денег на ${bestUpgrade.id} (+${bestUpgrade.profitPerHourDelta}. Цена - ${bestUpgrade.price}`
+        );
         setCooldown('noUpgradesUntil', account, 60);
         return;
     }

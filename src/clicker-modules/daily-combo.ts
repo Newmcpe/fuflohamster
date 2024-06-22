@@ -14,10 +14,7 @@ export async function dailyComboClaimer(account: HamsterAccount) {
         data: { upgradesForBuy, dailyCombo },
     } = await hamsterKombatService.getUpgradesForBuy(account.token);
 
-    if (dailyCombo.isClaimed) {
-        setCooldown('noUpgradesUntil', account, 500);
-        return;
-    }
+    if (dailyCombo.isClaimed) return;
 
     const {
         data: { clickerUser },
@@ -50,7 +47,7 @@ export async function dailyComboClaimer(account: HamsterAccount) {
                 Color.Magenta
             )
         );
-        setCooldown('noUpgradesUntil', account, 500);
+        setCooldown('noUpgradesUntil', account, 30);
         return;
     }
 
@@ -77,7 +74,6 @@ export async function dailyComboClaimer(account: HamsterAccount) {
         `|`,
         Logger.color('(+5 000 000 🪙)', Color.Green)
     );
-    setCooldown('noUpgradesUntil', account, 500);
 }
 
 export async function fetchDailyCombo(): Promise<DailyCombo> {

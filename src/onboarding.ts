@@ -111,37 +111,18 @@ export async function authKeyAuthPrompt(clientName: string) {
     await authKeyAuth(clientName, authKeyResponse.authKey);
 }
 
-export async function authKeyAuth(clientName: string, authKey: string) {
-    let opts: {
-        apiId: number;
-        apiHash: string;
-        storage: string;
-        transport?: any;
-    } = {
-        apiId: API_ID,
-        apiHash: API_HASH,
-        storage: `bot-data/${clientName}`,
-    };
-
-    if (process.env.PROXY_IP) {
-        opts = {
-            ...opts,
-            transport: new HttpProxyTcpTransport({
-                host: process.env.PROXY_IP,
-                port: parseInt(process.env.PROXY_PORT!),
-                user: process.env.PROXY_USER,
-                password: process.env.PROXY_PASS,
-            }),
-        };
-    }
-
-    const tg = new TelegramClient(opts);
+export async function authKeyAuth(
+    clientName: string,
+    authKey: string,
+    dc: string = '1'
+) {
+    const tg = createTelegramClient(clientName);
 
     await tg.importSession({
         authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
         testMode: false,
         version: 3,
-        primaryDcs: DC_MAPPING_PROD[1],
+        primaryDcs: DC_MAPPING_PROD[+dc],
     });
 
     await tg.close();
@@ -208,4 +189,31 @@ export async function exchangeTelegramForHamster(
             };
         });
     }
+}
+
+export function createTelegramClient(clientName: string) {
+    let opts: {
+        apiId: number;
+        apiHash: string;
+        storage: string;
+        transport?: any;
+    } = {
+        apiId: API_ID,
+        apiHash: API_HASH,
+        storage: `bot-data/${clientName}`,
+    };
+
+    if (process.env.PROXY_IP) {
+        opts = {
+            ...opts,
+            transport: new HttpProxyTcpTransport({
+                host: process.env.PROXY_IP,
+                port: parseInt(process.env.PROXY_PORT!),
+                user: process.env.PROXY_USER,
+                password: process.env.PROXY_PASS,
+            }),
+        };
+    }
+
+    return new TelegramClient(opts);
 }

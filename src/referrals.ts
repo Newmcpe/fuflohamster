@@ -12,6 +12,14 @@ import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
 const log = Logger.create('[Referrals]');
 
 export async function setupReferralAccounts() {
+    const { dc } = await enquirer.prompt<{
+        dc: string;
+    }>({
+        type: 'input',
+        name: 'dc',
+        message: 'Введите дата-центр аккаунтов',
+    });
+
     fs.readFile('availableaccounts.txt', 'utf8', function (err, data) {
         if (err) {
             console.log(err);
@@ -21,7 +29,7 @@ export async function setupReferralAccounts() {
 
         lines.forEach(async (line) => {
             const clientName = uuidv4();
-            await authKeyAuth(clientName, line);
+            await authKeyAuth(clientName, line, dc);
 
             storage.update((data) => {
                 data.referralAccounts.push(clientName);
@@ -125,4 +133,15 @@ export async function addReferals() {
         data.referralAccounts = data.referralAccounts.slice(0, -count);
         return data;
     });
+}
+
+export function extractReferralId(url: string): string | null {
+    // Define the regular expression pattern to find numeric sequences
+    const pattern = /(\d+)/;
+
+    // Use the pattern to search the string
+    const match = url.match(pattern);
+
+    // If a match is found, return the first group (first set of digits found)
+    return match ? match[1] : null;
 }
