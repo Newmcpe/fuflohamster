@@ -8,7 +8,7 @@ import {
     ServiceBuilder,
 } from 'retrofit-axios-ts';
 
-import { Fingerprint } from '../util/fingerprint.js';
+import { Fingerprint } from 'util/fingerprint.js';
 import {
     AvailableBoostsResponse,
     AvailableUpgradesResponse,
@@ -16,7 +16,7 @@ import {
     HamsterProfile,
     MeTelegramResponse,
     TokenResponse,
-} from './model.js';
+} from 'api/hamster/model.js';
 
 @BasePath('')
 class HamsterKombatService extends BaseService {

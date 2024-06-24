@@ -3,7 +3,11 @@ import { JSONFileSyncPreset } from 'lowdb/node';
 import { setupNewAccount } from './onboarding.js';
 import { Config, defaultConfig } from './util/config-schema.js';
 import { startHeartbeat } from './clicker-modules/heartbeat.js';
-import { addReferals, setupReferralAccounts } from 'referrals.js';
+import {
+    addReferals,
+    addReferalsPrompt,
+    setupReferralAccounts,
+} from 'referrals.js';
 import { startTelegramPanel } from 'telegram-panel/telegram-panel.js';
 
 export const storage = JSONFileSyncPreset<Config>('config.json', defaultConfig);
@@ -11,7 +15,7 @@ if (!storage.data.accounts) {
     await setupNewAccount(true);
 }
 
-await startTelegramPanel();
+startTelegramPanel();
 
 const menuResponse = await enquirer.prompt<{
     action: 'add' | 'run' | 'addrefaccs' | 'addreferals';
@@ -52,7 +56,7 @@ switch (menuResponse.action) {
         await setupReferralAccounts();
         break;
     case 'addreferals':
-        await addReferals();
+        await addReferalsPrompt();
         break;
     default:
         throw new Error('Unknown action');

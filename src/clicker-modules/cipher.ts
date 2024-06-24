@@ -1,5 +1,5 @@
 import { HamsterAccount } from 'util/config-schema.js';
-import { hamsterKombatService } from 'api/hamster-kombat-service.js';
+import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 
 const log = Logger.create('[CIPHER]');

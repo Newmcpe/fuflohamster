@@ -1,14 +1,15 @@
 import enquirer from 'enquirer';
-import { TelegramClient } from '@mtcute/node';
+import { BaseTelegramClientOptions, TelegramClient } from '@mtcute/node';
 import { API_HASH, API_ID } from './env.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getRandomFingerprint } from './util/fingerprint.js';
 import { storage } from './index.js';
-import { hamsterKombatService } from './api/hamster-kombat-service.js';
+import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { DC_MAPPING_PROD } from '@mtcute/convert';
 import { defaultHamsterAccount } from './util/config-schema.js';
 import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
 import * as process from 'node:process';
+import { toInputUser } from '@mtcute/node/utils.js';
 
 export async function setupNewAccount(firstTime = false) {
     const { authMethod, clientName } = await enquirer.prompt<{
@@ -137,7 +138,7 @@ export async function exchangeTelegramForHamster(
     saveToStorage = false
 ) {
     const hamsterPeer = await tg.resolvePeer('hamster_kombat_bot');
-    const hamsterUser = await tg.resolveUser(hamsterPeer);
+    const hamsterUser = toInputUser(hamsterPeer);
 
     const result = await tg.call({
         _: 'messages.requestAppWebView',
@@ -192,27 +193,28 @@ export async function exchangeTelegramForHamster(
 }
 
 export function createTelegramClient(clientName: string) {
-    let opts: {
-        apiId: number;
-        apiHash: string;
-        storage: string;
-        transport?: any;
-    } = {
+    let opts: BaseTelegramClientOptions = {
         apiId: API_ID,
         apiHash: API_HASH,
         storage: `bot-data/${clientName}`,
+        initConnectionOptions: {
+            langCode: 'en',
+            langPack: 'en',
+            systemLangCode: 'en',
+            appVersion: '5.1.7 x64',
+            deviceModel: 'Desktop',
+            systemVersion: '10',
+        },
     };
 
     if (process.env.PROXY_IP) {
-        opts = {
-            ...opts,
-            transport: new HttpProxyTcpTransport({
-                host: process.env.PROXY_IP,
+        opts.transport = () =>
+            new HttpProxyTcpTransport({
+                host: process.env.PROXY_IP!,
                 port: parseInt(process.env.PROXY_PORT!),
                 user: process.env.PROXY_USER,
                 password: process.env.PROXY_PASS,
-            }),
-        };
+            });
     }
 
     return new TelegramClient(opts);

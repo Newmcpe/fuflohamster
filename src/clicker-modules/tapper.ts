@@ -1,5 +1,5 @@
 import { HamsterAccount } from '../util/config-schema.js';
-import { hamsterKombatService } from '../api/hamster-kombat-service.js';
+import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { isCooldownOver, setCooldown } from './heartbeat.js';
 import { Color, Logger } from '@starkow/logger';
 import random from 'random';

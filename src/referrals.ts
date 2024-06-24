@@ -1,13 +1,16 @@
 import fs from 'node:fs';
 import { v4 as uuidv4 } from 'uuid';
-import { authKeyAuth, exchangeTelegramForHamster } from 'onboarding.js';
+import {
+    authKeyAuth,
+    createTelegramClient,
+    exchangeTelegramForHamster,
+} from 'onboarding.js';
 import enquirer from 'enquirer';
 import { Color, Logger } from '@starkow/logger';
-import { TelegramClient } from '@mtcute/node';
-import { API_HASH, API_ID } from 'env.js';
 import { storage } from 'index.js';
-import process from 'node:process';
+import { API_HASH, API_ID } from 'env.js';
 import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
+import { TelegramClient } from '@mtcute/node';
 
 const log = Logger.create('[Referrals]');
 
@@ -45,7 +48,7 @@ export async function setupReferralAccounts() {
     });
 }
 
-export async function addReferals() {
+export async function addReferalsPrompt() {
     const { count } = await enquirer.prompt<{ count: number }>({
         type: 'input',
         name: 'count',
@@ -58,8 +61,32 @@ export async function addReferals() {
         message: '👥 Кому добавить рефералов?',
     });
 
+    const successCount = await addReferals(+targetId, count, (clientName) => {
+        log.info(
+            Logger.color('Добавлен реферал:', Color.Green),
+            Logger.color(clientName, Color.Yellow),
+            Logger.color('к', Color.Gray),
+            Logger.color(targetId, Color.Yellow)
+        );
+    });
+
+    log.info(
+        Logger.color(successCount.toString(), Color.Green),
+        Logger.color('из', Color.Gray),
+        Logger.color(count.toString(), Color.Green),
+        Logger.color('рефералов', Color.Green),
+        Logger.color('для ', Color.Green),
+        Logger.color(targetId, Color.Yellow)
+    );
+}
+
+export async function addReferals(
+    targetId: number,
+    count: number,
+    onReferalAddition: (clientName: string) => void
+) {
     const referralAccounts = storage.data.referralAccounts.slice(-count);
-    let success = 0;
+    let successCount = 0;
 
     for (const clientName of referralAccounts) {
         try {
@@ -67,51 +94,23 @@ export async function addReferals() {
                 Logger.color(clientName, Color.Yellow),
                 Logger.color(' | ', Color.Gray),
                 Logger.color('Регистрирую по рефералке UserID', Color.Green),
-                Logger.color(targetId, Color.Yellow)
+                Logger.color(targetId.toString(), Color.Yellow)
             );
 
-            let opts: {
-                apiId: number;
-                apiHash: string;
-                storage: string;
-                transport?: any;
-            } = {
-                apiId: API_ID,
-                apiHash: API_HASH,
-                storage: `bot-data/${clientName}`,
-            };
-
-            if (process.env.PROXY_IP) {
-                opts = {
-                    ...opts,
-                    transport: () =>
-                        new HttpProxyTcpTransport({
-                            host: process.env.PROXY_IP!,
-                            port: parseInt(process.env.PROXY_PORT!),
-                            user: process.env.PROXY_USER,
-                            password: process.env.PROXY_PASS,
-                        }),
-                };
-            }
-
-            const tg = new TelegramClient(opts);
+            const tg = createTelegramClient(clientName);
+            console.log(
+                await tg.call({
+                    _: 'help.getNearestDc',
+                })
+            );
 
             await tg.start();
-
             await exchangeTelegramForHamster(tg, clientName, +targetId);
             await tg.close();
 
-            log.info(
-                Logger.color(clientName, Color.Yellow),
-                Logger.color(' | ', Color.Gray),
-                Logger.color(
-                    'Успешно зарегался по рефералке UserID',
-                    Color.Green
-                ),
-                Logger.color(targetId, Color.Yellow)
-            );
+            onReferalAddition(clientName);
 
-            success++;
+            successCount++;
             await new Promise((resolve) => setTimeout(resolve, 750));
         } catch (e) {
             log.error(
@@ -122,26 +121,18 @@ export async function addReferals() {
             );
         }
     }
-    log.info(
-        Logger.color(success.toString(), Color.Green),
-        Logger.color(count.toString(), Color.Yellow),
-        Logger.color('рефералов', Color.Green),
-        Logger.color('для ', Color.Green),
-        Logger.color(targetId, Color.Yellow)
-    );
+
     storage.update((data) => {
         data.referralAccounts = data.referralAccounts.slice(0, -count);
         return data;
     });
+
+    return successCount;
 }
 
 export function extractReferralId(url: string): string | null {
-    // Define the regular expression pattern to find numeric sequences
     const pattern = /(\d+)/;
-
-    // Use the pattern to search the string
     const match = url.match(pattern);
 
-    // If a match is found, return the first group (first set of digits found)
     return match ? match[1] : null;
 }

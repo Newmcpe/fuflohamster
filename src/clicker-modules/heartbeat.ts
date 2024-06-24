@@ -2,7 +2,7 @@ import { storage } from '../index.js';
 import { HamsterAccount } from '../util/config-schema.js';
 import { tap } from './tapper.js';
 import { dateNowInSeconds } from '../util/date.js';
-import { hamsterKombatService } from '../api/hamster-kombat-service.js';
+import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 import { upgrader } from 'clicker-modules/upgrader.js';
 import { cipherClaimer } from 'clicker-modules/cipher.js';
