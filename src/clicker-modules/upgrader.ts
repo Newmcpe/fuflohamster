@@ -22,7 +22,7 @@ export async function upgrader(account: HamsterAccount) {
             upgrade.isAvailable &&
             !upgrade.isExpired &&
             upgrade.cooldownSeconds == 0 &&
-            upgrade.level < 13 &&
+            upgrade.profitPerHourDelta * 120 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
             upgrade.price < profile.clickerUser.balanceCoins &&
             (!upgrade.condition ||
