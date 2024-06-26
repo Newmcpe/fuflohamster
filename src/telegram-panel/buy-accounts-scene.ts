@@ -1,4 +1,5 @@
 import {
+    filters,
     MessageContext,
     WizardScene,
     WizardSceneAction,
@@ -6,6 +7,9 @@ import {
 import { lolzMarketService } from 'api/lzt/lzt-market-service.js';
 import { ItemData } from 'api/lzt/model.js';
 import { authKeyAuth } from 'onboarding.js';
+import { storage } from 'index.js';
+import { BotKeyboard } from '@mtcute/node';
+import { defaultMenu } from 'telegram-panel/telegram-panel.js';
 
 interface BuyAccountsForm {
     count: number;
@@ -20,7 +24,11 @@ BuyAccountsWizard.addStep(async (msg, state) => {
     const count = +msg.text.trim();
 
     if (isNaN(count) || count < 1) {
-        await msg.replyText('Invalid count!');
+        await msg.replyText('Неверное количество', {
+            replyMarkup: BotKeyboard.inline([
+                [BotKeyboard.callback('Отмена', 'cancel')],
+            ]),
+        });
         return WizardSceneAction.Stay;
     }
     await state.set({ count, maxPrice: 0 });
@@ -34,12 +42,28 @@ BuyAccountsWizard.addStep(async (msg, state) => {
     return WizardSceneAction.Next;
 });
 
+BuyAccountsWizard.onCallbackQuery(
+    filters.equals('cancel'),
+    async (upd, state) => {
+        await upd.editMessage({
+            text: 'Выберите действие',
+            replyMarkup: defaultMenu,
+        });
+        await state.exit();
+    }
+);
+
 BuyAccountsWizard.addStep(async (msg, state) => {
     const count = (await state.get())!.count;
     const price = +msg.text.trim();
 
     if (isNaN(price) || price < 0) {
-        await msg.replyText('Invalid price!');
+        await msg.replyText('Неверное количество', {
+            replyMarkup: BotKeyboard.inline([
+                [BotKeyboard.callback('Отмена', 'cancel')],
+            ]),
+        });
+
         return WizardSceneAction.Stay;
     }
 
@@ -70,7 +94,7 @@ BuyAccountsWizard.addStep(async (msg, state) => {
         message: summaryMsg,
         text:
             summaryMsg.text +
-            `\nАккаунты:\n${itemsToBuy.map((item, idx) => `[${idx}] - [${item.item_id}] = ${item.price} RUB`).join('\n')}`,
+            `\nАккаунты:\n${itemsToBuy.map((item, idx) => `[${idx}] - ${item.title}[${item.item_id}] = ${item.price} RUB`).join('\n')}`,
     });
 
     await buyAccounts(itemsToBuy, msg);
@@ -85,25 +109,41 @@ async function buyAccounts(itemsToBuy: ItemData[], msg: MessageContext) {
 
     for (let itemIdx = 0; itemIdx < itemsToBuy.length; itemIdx++) {
         const itemToBuy = itemsToBuy[itemIdx];
-        const response = await lolzMarketService.fastBuy(itemToBuy.item_id);
-        if (response.status === 200) {
-            const {
-                data: { item },
-            } = response;
+        try {
+            const response = await lolzMarketService.fastBuy(itemToBuy.item_id);
+            if (response.status === 200) {
+                const {
+                    data: { item },
+                } = response;
 
-            await authKeyAuth(
-                item.item_id.toString(),
-                item.loginData.raw,
-                item.loginData.password
-            );
+                await authKeyAuth(
+                    item.item_id.toString(),
+                    item.loginData.raw,
+                    item.loginData.password
+                );
+
+                storage.update((data) => {
+                    data.referralAccounts.push(item.item_id.toString());
+                });
+
+                await msg.answerText(
+                    `✅ [${itemIdx + 1}/${itemsToBuy.length}] Аккаунт ${item.item_id} - ${item.title} успешно куплен`
+                );
+            } else {
+                await msg.answerText(
+                    `❌ [${itemIdx + 1}/${itemsToBuy.length}] Ошибка покупки аккаунта ${itemToBuy.item_id}`
+                );
+            }
+        } catch (_e) {
+            let e: Error = _e as Error;
 
             await msg.answerText(
-                `✅ [${itemIdx}/${itemsToBuy.length}] Аккаунт ${item.item_id} - ${item.title} успешно куплен`
-            );
-        } else {
-            await msg.answerText(
-                `❌ [${itemIdx}/${itemsToBuy.length}] Ошибка покупки аккаунта ${itemToBuy.item_id}`
+                `❌ [${itemIdx + 1}/${itemsToBuy.length}] Ошибка покупки аккаунта ${itemToBuy.item_id}\n${e.message}\n${e.stack}`
             );
         }
     }
+
+    await msg.answerText('Выберите действие', {
+        replyMarkup: defaultMenu,
+    });
 }

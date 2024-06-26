@@ -22,7 +22,10 @@ export async function dailyComboClaimer(account: HamsterAccount) {
     const { combo: revealedDailyCombo } = await fetchDailyCombo();
 
     upgradesForBuy = upgradesForBuy.filter((upgrade) => {
-        return revealedDailyCombo.includes(upgrade.id);
+        return (
+            revealedDailyCombo.includes(upgrade.id) &&
+            !dailyCombo.upgradeIds.includes(upgrade.id)
+        );
     });
 
     const totalCost = upgradesForBuy.reduce((acc, upgrade) => {
@@ -77,10 +80,13 @@ export async function dailyComboClaimer(account: HamsterAccount) {
 }
 
 export async function fetchDailyCombo(): Promise<DailyCombo> {
-    const response = await fetch('https://api21.datavibe.top/api/GetCombo', {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    const response = await fetch(
+        'https://github.com/AnisovAleksey/HamsterKombatBot/raw/e1594a9febb4d0a13dedef10495b1ccb58a81bce/daily_combo.json',
+        {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    );
     return await response.json();
 }

@@ -22,6 +22,7 @@ export async function upgrader(account: HamsterAccount) {
             upgrade.isAvailable &&
             !upgrade.isExpired &&
             upgrade.cooldownSeconds == 0 &&
+            upgrade.level < 13 &&
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
             upgrade.price < profile.clickerUser.balanceCoins &&
             (!upgrade.condition ||
@@ -39,7 +40,7 @@ export async function upgrader(account: HamsterAccount) {
             Logger.color(' | ', Color.Gray),
             `Нет доступных улучшений`
         );
-        setCooldown('noUpgradesUntil', account, 50);
+        setCooldown('noUpgradesUntil', account, 900);
         return;
     }
 

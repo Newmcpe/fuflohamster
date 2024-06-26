@@ -163,10 +163,6 @@ export const hamsterKombatService = new ServiceBuilder()
 
             return config;
         },
-        rejected: (e: Error) => {
-            console.log(`Request interceptor error. ${e.stack}`);
-            return Promise.resolve();
-        },
     })
-    .setStandalone(false)
+    .setStandalone(true)
     .build(HamsterKombatService);

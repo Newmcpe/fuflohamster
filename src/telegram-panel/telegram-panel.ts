@@ -20,10 +20,23 @@ const dp = Dispatcher.for<{}>(tg, {
     storage: new MemoryStateStorage(),
 });
 
+export const MainMenu = new CallbackDataBuilder('main', 'action');
+export const defaultMenu = BotKeyboard.inline([
+    [
+        BotKeyboard.callback(
+            'Закупить аккаунты',
+            MainMenu.build({ action: 'buy_hams' })
+        ),
+        BotKeyboard.callback(
+            'Накрутить рефералов',
+            MainMenu.build({ action: 'give_referrals' })
+        ),
+    ],
+]);
+
 dp.addScene(GiveReferralsWizard);
 dp.addScene(BuyAccountsWizard);
 
-export const MainMenu = new CallbackDataBuilder('main', 'action');
 dp.onNewMessage(filters.command('start'), async (msg) => {
     await msg.answerText(
         `🧾 Доступное количество рефералов: ${storage.data.referralAccounts.length}`,
