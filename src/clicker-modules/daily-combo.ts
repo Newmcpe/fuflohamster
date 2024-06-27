@@ -21,12 +21,33 @@ export async function dailyComboClaimer(account: HamsterAccount) {
     } = await hamsterKombatService.getProfileData(account.token);
     const { combo: revealedDailyCombo } = await fetchDailyCombo();
 
-    upgradesForBuy = upgradesForBuy.filter((upgrade) => {
-        return (
-            revealedDailyCombo.includes(upgrade.id) &&
-            !dailyCombo.upgradeIds.includes(upgrade.id)
+    upgradesForBuy = upgradesForBuy
+        .filter((upgrade) => {
+            return (
+                revealedDailyCombo.includes(upgrade.id) &&
+                !dailyCombo.upgradeIds.includes(upgrade.id)
+            );
+        })
+        .filter(
+            (upgrade) =>
+                upgrade.isAvailable &&
+                !upgrade.isExpired &&
+                upgrade.cooldownSeconds == 0 &&
+                clickerUser.referralsCount >=
+                    (upgrade.condition?.referralCount ?? 0) &&
+                upgrade.profitPerHourDelta * 180 + 1666666 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
+                (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
+                upgrade.price < clickerUser.balanceCoins
         );
-    });
+
+    if (upgradesForBuy.length === 0) {
+        log.info(
+            Logger.color(account.clientName, Color.Cyan),
+            Logger.color(' | ', Color.Gray),
+            `Комбо не выгодно к покупке`
+        );
+        return;
+    }
 
     const totalCost = upgradesForBuy.reduce((acc, upgrade) => {
         return acc + upgrade.price;

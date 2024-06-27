@@ -16,20 +16,16 @@ export async function upgrader(account: HamsterAccount) {
     let {
         data: { upgradesForBuy },
     } = await hamsterKombatService.getUpgradesForBuy(account.token);
-
     upgradesForBuy = upgradesForBuy.filter(
         (upgrade) =>
             upgrade.isAvailable &&
             !upgrade.isExpired &&
             upgrade.cooldownSeconds == 0 &&
-            upgrade.profitPerHourDelta * 120 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
+            profile.clickerUser.referralsCount >=
+                (upgrade.condition?.referralCount ?? 0) &&
+            upgrade.profitPerHourDelta * 180 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
-            upgrade.price < profile.clickerUser.balanceCoins &&
-            (!upgrade.condition ||
-                (upgrade.condition._type !== 'ByUpgrade' &&
-                    (upgrade.condition._type !== 'ReferralCount' ||
-                        profile.clickerUser.referralsCount >=
-                            upgrade.condition.referralCount!)))
+            upgrade.price < profile.clickerUser.balanceCoins
     );
 
     const bestUpgrade = upgradesForBuy[0];
