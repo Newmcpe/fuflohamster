@@ -24,7 +24,6 @@ export async function upgrader(account: HamsterAccount) {
             profile.clickerUser.referralsCount >=
                 (upgrade.condition?.referralCount ?? 0) &&
             upgrade.profitPerHourDelta * 180 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
-            (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
             upgrade.price < profile.clickerUser.balanceCoins
     );
 
