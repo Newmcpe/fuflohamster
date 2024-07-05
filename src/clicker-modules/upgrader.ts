@@ -3,6 +3,7 @@ import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 import { isCooldownOver, setCooldown } from 'clicker-modules/heartbeat.js';
 import { formatNumber } from 'util/number.js';
+import { Upgrade } from 'api/hamster/model.js';
 
 const log = Logger.create('[Upgrader] ');
 
@@ -16,34 +17,32 @@ export async function upgrader(account: HamsterAccount) {
     let {
         data: { upgradesForBuy },
     } = await hamsterKombatService.getUpgradesForBuy(account.token);
-    upgradesForBuy = upgradesForBuy.filter(
-        (upgrade) =>
-            upgrade.isAvailable &&
-            !upgrade.isExpired &&
-            upgrade.cooldownSeconds == 0 &&
-            profile.clickerUser.referralsCount >=
-                (upgrade.condition?.referralCount ?? 0) &&
-            upgrade.profitPerHourDelta * 180 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
-            upgrade.price < profile.clickerUser.balanceCoins
-    );
 
-    const bestUpgrade = upgradesForBuy[0];
+    const bestUpgrade: Upgrade | null = upgradesForBuy
+        .filter(
+            (upgrade) =>
+                upgrade.isAvailable &&
+                !upgrade.isExpired &&
+                upgrade.cooldownSeconds === 0 &&
+                upgrade.profitPerHourDelta * 100 >= upgrade.price &&
+                (upgrade.condition?.referralCount ?? 0) <=
+                    profile.clickerUser.referralsCount &&
+                upgrade.price < profile.clickerUser.balanceCoins
+        )
+        .reduce(
+            (best, upgrade) =>
+                best === null ||
+                upgrade.profitPerHourDelta > best.profitPerHourDelta
+                    ? upgrade
+                    : best,
+            null as Upgrade | null
+        );
 
     if (!bestUpgrade) {
         log.info(
             Logger.color(account.clientName, Color.Cyan),
             Logger.color(' | ', Color.Gray),
             `Нет доступных улучшений`
-        );
-        setCooldown('noUpgradesUntil', account, 900);
-        return;
-    }
-
-    if (profile.clickerUser.balanceCoins < bestUpgrade!.price) {
-        log.info(
-            Logger.color(account.clientName, Color.Cyan),
-            Logger.color(' | ', Color.Gray),
-            `Не хватает денег на ${bestUpgrade.id} (+${bestUpgrade.profitPerHourDelta}. Цена - ${bestUpgrade.price}`
         );
         setCooldown('noUpgradesUntil', account, 60);
         return;

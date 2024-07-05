@@ -138,7 +138,7 @@ async function buyAccounts(itemsToBuy: ItemData[], msg: MessageContext) {
             let e: Error = _e as Error;
 
             await msg.answerText(
-                `❌ [${itemIdx + 1}/${itemsToBuy.length}] Ошибка покупки аккаунта ${itemToBuy.item_id}\n${e.message}\n${e.stack}`
+                `❌ [${itemIdx + 1}/${itemsToBuy.length}] Ошибка покупки аккаунта ${itemToBuy.item_id}\n${e}`
             );
         }
     }

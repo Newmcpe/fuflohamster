@@ -15,6 +15,7 @@ export type HamsterAccount = {
 export type Cooldowns = {
     noTapsUntil: number;
     noUpgradesUntil: number;
+    noDailyComboUntil: number;
 };
 
 export const defaultConfig: Config = {
@@ -28,5 +29,6 @@ export const defaultHamsterAccount = {
     currentCooldowns: {
         noTapsUntil: 0,
         noUpgradesUntil: 0,
+        noDailyComboUntil: 0,
     },
 };

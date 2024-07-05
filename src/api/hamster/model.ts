@@ -73,33 +73,35 @@ export type HamsterProfile = {
 };
 
 export type AvailableUpgradesResponse = {
-    upgradesForBuy: {
-        id: string;
-        name: string;
-        price: number;
-        profitPerHour: number;
-        condition: {
-            referralCount?: number;
-            _type: string;
-            link: string;
-            channelId: number;
-        } | null;
-        cooldownSeconds?: number;
-        section: string;
-        level: number;
-        maxLevel?: number;
-        currentProfitPerHour: number;
-        profitPerHourDelta: number;
-        isAvailable: boolean;
-        isExpired: boolean;
-        totalCooldownSeconds: number;
-    }[];
+    upgradesForBuy: Upgrade[];
     dailyCombo: {
         upgradeIds: string[];
         bonusCoins: number;
         isClaimed: boolean;
         remainSeconds: number;
     };
+};
+
+export type Upgrade = {
+    id: string;
+    name: string;
+    price: number;
+    profitPerHour: number;
+    condition: {
+        referralCount?: number;
+        _type: string;
+        link: string;
+        channelId: number;
+    } | null;
+    cooldownSeconds?: number;
+    section: string;
+    level: number;
+    maxLevel?: number;
+    currentProfitPerHour: number;
+    profitPerHourDelta: number;
+    isAvailable: boolean;
+    isExpired: boolean;
+    totalCooldownSeconds: number;
 };
 
 export type ClickerGameConfig = {

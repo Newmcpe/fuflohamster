@@ -8,7 +8,11 @@ import { formatNumber } from 'util/number.js';
 const log = Logger.create('[DAILY-COMBO]');
 
 export async function dailyComboClaimer(account: HamsterAccount) {
-    if (!isCooldownOver('noUpgradesUntil', account)) return;
+    if (
+        !isCooldownOver('noUpgradesUntil', account) ||
+        !isCooldownOver('noDailyComboUntil', account)
+    )
+        return;
 
     let {
         data: { upgradesForBuy, dailyCombo },
@@ -21,31 +25,26 @@ export async function dailyComboClaimer(account: HamsterAccount) {
     } = await hamsterKombatService.getProfileData(account.token);
     const { combo: revealedDailyCombo } = await fetchDailyCombo();
 
-    upgradesForBuy = upgradesForBuy
-        .filter((upgrade) => {
-            return (
-                revealedDailyCombo.includes(upgrade.id) &&
-                !dailyCombo.upgradeIds.includes(upgrade.id)
-            );
-        })
-        .filter(
-            (upgrade) =>
-                upgrade.isAvailable &&
-                !upgrade.isExpired &&
-                upgrade.cooldownSeconds == 0 &&
-                clickerUser.referralsCount >=
-                    (upgrade.condition?.referralCount ?? 0) &&
-                upgrade.profitPerHourDelta * 180 + 1666666 < upgrade.price && // не покупать улучшения, которые окупаются дольше 5 дней / 120 часов
-                (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
-                upgrade.price < clickerUser.balanceCoins
-        );
+    upgradesForBuy = upgradesForBuy.filter(
+        (upgrade) =>
+            revealedDailyCombo.includes(upgrade.id) &&
+            !dailyCombo.upgradeIds.includes(upgrade.id) &&
+            upgrade.isAvailable &&
+            !upgrade.isExpired &&
+            upgrade.cooldownSeconds == 0 &&
+            clickerUser.referralsCount >=
+                (upgrade.condition?.referralCount ?? 0) &&
+            (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
+            upgrade.price < clickerUser.balanceCoins
+    );
 
     if (upgradesForBuy.length === 0) {
         log.info(
             Logger.color(account.clientName, Color.Cyan),
             Logger.color(' | ', Color.Gray),
-            `Комбо не выгодно к покупке`
+            `Нет доступных улучшений для покупки комбо.`
         );
+        setCooldown('noDailyComboUntil', account, 600);
         return;
     }
 
@@ -102,7 +101,7 @@ export async function dailyComboClaimer(account: HamsterAccount) {
 
 export async function fetchDailyCombo(): Promise<DailyCombo> {
     const response = await fetch(
-        'https://github.com/AnisovAleksey/HamsterKombatBot/raw/e1594a9febb4d0a13dedef10495b1ccb58a81bce/daily_combo.json',
+        'https://hamster-kombo-server.vercel.app/api/GetCombo',
         {
             headers: {
                 'Content-Type': 'application/json',
