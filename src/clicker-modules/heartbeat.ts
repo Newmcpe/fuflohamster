@@ -37,7 +37,13 @@ export async function startHeartbeat() {
             '🪙',
             Logger.color('|', Color.Gray),
             'Текущий уровень:',
-            Logger.color(clickerUser.level.toString(), Color.Magenta)
+            Logger.color(clickerUser.level.toString(), Color.Magenta),
+            Logger.color('|', Color.Gray),
+            'Количество рефералов:',
+            Logger.color(clickerUser.referralsCount.toString(), Color.Magenta),
+            Logger.color('|', Color.Gray),
+            'Стоимость аккаунта:',
+            Logger.color(formatNumber(clickerUser.totalCoins), Color.Magenta)
         );
 
         setInterval(async () => {

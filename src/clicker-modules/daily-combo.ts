@@ -31,7 +31,8 @@ export async function dailyComboClaimer(account: HamsterAccount) {
             !dailyCombo.upgradeIds.includes(upgrade.id) &&
             upgrade.isAvailable &&
             !upgrade.isExpired &&
-            upgrade.cooldownSeconds == 0 &&
+            (upgrade.cooldownSeconds === 0 || !upgrade.cooldownSeconds) &&
+            upgrade.profitPerHourDelta * 150 + 1666666 >= upgrade.price &&
             clickerUser.referralsCount >=
                 (upgrade.condition?.referralCount ?? 0) &&
             (upgrade.maxLevel || upgrade.level) >= upgrade.level &&
