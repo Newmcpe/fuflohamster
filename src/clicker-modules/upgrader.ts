@@ -24,7 +24,7 @@ export async function upgrader(account: HamsterAccount) {
                 upgrade.isAvailable &&
                 !upgrade.isExpired &&
                 (upgrade.cooldownSeconds === 0 || !upgrade.cooldownSeconds) &&
-                upgrade.profitPerHourDelta * 150 >= upgrade.price &&
+                upgrade.profitPerHourDelta * 168 >= upgrade.price &&
                 (upgrade.condition?.referralCount ?? 0) <=
                     profile.clickerUser.referralsCount &&
                 upgrade.price < profile.clickerUser.balanceCoins

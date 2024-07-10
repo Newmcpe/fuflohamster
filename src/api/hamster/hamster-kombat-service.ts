@@ -17,6 +17,7 @@ import {
     MeTelegramResponse,
     TokenResponse,
 } from 'api/hamster/model.js';
+import { TasksResponse } from 'api/lzt/model.js';
 
 @BasePath('')
 class HamsterKombatService extends BaseService {
@@ -131,6 +132,13 @@ class HamsterKombatService extends BaseService {
         return {} as Response<AvailableBoostsResponse>;
     }
 
+    @POST('clicker/list-tasks')
+    async listTasks(
+        @Header('Authorization') _token: string
+    ): Promise<Response<TasksResponse>> {
+        return {} as Response<TasksResponse>;
+    }
+
     @POST('clicker/buy-boost')
     async applyBoost(
         @Header('Authorization') _token: string,
@@ -138,6 +146,17 @@ class HamsterKombatService extends BaseService {
         _: {
             timestamp: number;
             boostId: string;
+        }
+    ): Promise<Response<void>> {
+        return {} as Response<void>;
+    }
+
+    @POST('clicker/check-task')
+    async checkTask(
+        @Header('Authorization') _token: string,
+        @Body
+        _: {
+            taskId: string;
         }
     ): Promise<Response<void>> {
         return {} as Response<void>;

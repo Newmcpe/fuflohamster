@@ -8,6 +8,7 @@ import { upgrader } from 'clicker-modules/upgrader.js';
 import { cipherClaimer } from 'clicker-modules/cipher.js';
 import { dailyComboClaimer } from 'clicker-modules/daily-combo.js';
 import { formatNumber } from 'util/number.js';
+import { dailyBonusCompleter } from 'clicker-modules/daily-bonus-completer.js';
 
 const log = Logger.create('[HEARTBEAT]');
 
@@ -57,7 +58,7 @@ export async function startHeartbeat() {
                     e
                 );
             }
-        }, 1000);
+        }, 5000);
     }
 }
 
@@ -66,6 +67,7 @@ async function accountHeartbeat(account: HamsterAccount) {
     await dailyComboClaimer(account);
     await upgrader(account);
     await cipherClaimer(account);
+    await dailyBonusCompleter(account);
 }
 
 export function isCooldownOver(
