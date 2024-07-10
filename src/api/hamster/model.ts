@@ -226,3 +226,31 @@ type Boost = {
 export type AvailableBoostsResponse = {
     boostsForBuy: Boost[];
 };
+
+type Task = {
+    id: string;
+    rewardCoins: number;
+    periodicity: 'Once' | 'Repeatedly';
+    link?: string;
+    isCompleted: boolean;
+    linksWithLocales?: LinkWithLocale[];
+    channelId?: number;
+    completedAt?: string;
+    rewardsByDays?: RewardByDay[];
+    days?: number;
+    remainSeconds?: number;
+};
+
+type LinkWithLocale = {
+    locale: string;
+    link: string;
+};
+
+type RewardByDay = {
+    days: number;
+    rewardCoins: number;
+};
+
+export type TasksResponse = {
+    tasks: Task[];
+};

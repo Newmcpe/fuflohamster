@@ -16,8 +16,8 @@ import {
     HamsterProfile,
     MeTelegramResponse,
     TokenResponse,
+    TasksResponse,
 } from 'api/hamster/model.js';
-import { TasksResponse } from 'api/lzt/model.js';
 
 @BasePath('')
 class HamsterKombatService extends BaseService {
