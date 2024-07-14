@@ -21,6 +21,7 @@
         "@mtcute/http-proxy": "^0.13.0",
         "@mtcute/node": "^0.13.0",
         "@starkow/logger": "^2.3.1",
+        "axios": "^1.7.2",
         "enquirer": "^2.4.1",
         "grammy": "^1.25.1",
         "long": "^5.2.3",

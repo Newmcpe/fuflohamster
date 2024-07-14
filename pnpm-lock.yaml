@@ -35,6 +35,9 @@ importers:
       '@starkow/logger':
         specifier: ^2.3.1
         version: 2.3.1
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.2
       enquirer:
         specifier: ^2.4.1
         version: 2.4.1

@@ -119,7 +119,9 @@ async function buyAccounts(itemsToBuy: ItemData[], msg: MessageContext) {
                 await authKeyAuth(
                     item.item_id.toString(),
                     item.loginData.raw,
-                    item.loginData.password
+                    item.loginData.password,
+                    false,
+                    null
                 );
 
                 storage.update((data) => {

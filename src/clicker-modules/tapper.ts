@@ -1,9 +1,14 @@
 import { HamsterAccount } from '../util/config-schema.js';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { isCooldownOver, setCooldown } from './heartbeat.js';
 import { Color, Logger } from '@starkow/logger';
 import random from 'random';
 import { formatNumber } from 'util/number.js';
+import {
+    applyBoost,
+    getBoosts,
+    getProfileData,
+    sendTaps,
+} from 'api/hamster/hamster-kombat-service.js';
 
 const log = Logger.create('[TAPPER]');
 
@@ -12,7 +17,7 @@ export async function tap(account: HamsterAccount) {
 
     let {
         data: { clickerUser },
-    } = await hamsterKombatService.getProfileData(account.token);
+    } = await getProfileData(account);
 
     const availableTaps = clickerUser.availableTaps / clickerUser.earnPerTap;
 
@@ -28,7 +33,7 @@ export async function tap(account: HamsterAccount) {
 
         const {
             data: { boostsForBuy },
-        } = await hamsterKombatService.getBoosts(account.token);
+        } = await getBoosts(account);
 
         const boost = boostsForBuy.find(
             (boost) => boost.id === 'BoostFullAvailableTaps'
@@ -39,10 +44,7 @@ export async function tap(account: HamsterAccount) {
             boost.cooldownSeconds == 0 &&
             boost.level <= (boost.maxLevel ?? 0)
         ) {
-            await hamsterKombatService.applyBoost(account.token, {
-                timestamp: Date.now(),
-                boostId: boost.id,
-            });
+            await applyBoost(account, boost.id, Date.now());
 
             log.info(
                 Logger.color(account.clientName, Color.Cyan),
@@ -59,11 +61,7 @@ export async function tap(account: HamsterAccount) {
 
     const {
         data: { clickerUser: newClickerUser },
-    } = await hamsterKombatService.tap(account.token, {
-        availableTaps,
-        count: taps,
-        timestamp: Date.now(),
-    });
+    } = await sendTaps(account, availableTaps, taps, Date.now());
 
     const sleepTime = random.int(5, 25);
 

@@ -4,12 +4,16 @@ import { API_HASH, API_ID } from './env.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getRandomFingerprint } from './util/fingerprint.js';
 import { storage } from './index.js';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { DC_MAPPING_PROD } from '@mtcute/convert';
-import { defaultHamsterAccount } from './util/config-schema.js';
+import { defaultHamsterAccount, Proxy } from './util/config-schema.js';
 import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
 import * as process from 'node:process';
 import { toInputUser } from '@mtcute/node/utils.js';
+import {
+    addReferral,
+    authByTelegramWebApp,
+    selectExchange,
+} from 'api/hamster/hamster-kombat-service.js';
 
 export async function setupNewAccount(firstTime = false) {
     const { authMethod, clientName } = await enquirer.prompt<{
@@ -54,6 +58,8 @@ export async function setupNewAccount(firstTime = false) {
 }
 
 async function phoneAuth(clientName: string) {
+    const proxy = await proxyPrompt();
+
     const tg = new TelegramClient({
         apiId: API_ID,
         apiHash: API_HASH,
@@ -96,8 +102,41 @@ async function phoneAuth(clientName: string) {
         },
     });
 
-    await exchangeTelegramForHamster(tg, clientName, undefined, true);
+    await exchangeTelegramForHamster(tg, clientName, undefined, true, proxy);
     await tg.close();
+}
+
+async function proxyPrompt(): Promise<Proxy | null> {
+    const { needProxy } = await enquirer.prompt<{ needProxy: boolean }>({
+        type: 'confirm',
+        name: 'needProxy',
+        message: '🔗 Нужен ли прокси для подключения?',
+    });
+
+    if (!needProxy) return null;
+
+    return enquirer.prompt<Proxy>([
+        {
+            type: 'input',
+            name: 'host',
+            message: '🔗 Введите хост прокси',
+        },
+        {
+            type: 'input',
+            name: 'port',
+            message: '🔗 Введите порт прокси',
+        },
+        {
+            type: 'input',
+            name: 'username',
+            message: '🔗 Введите имя пользователя прокси',
+        },
+        {
+            type: 'input',
+            name: 'password',
+            message: '🔗 Введите пароль прокси',
+        },
+    ]);
 }
 
 export async function authKeyAuthPrompt(clientName: string) {
@@ -109,15 +148,19 @@ export async function authKeyAuthPrompt(clientName: string) {
         message: 'Введите Auth Key (HEX)',
     });
 
-    await authKeyAuth(clientName, authKeyResponse.authKey);
+    const proxy = await proxyPrompt();
+
+    await authKeyAuth(clientName, authKeyResponse.authKey, '2', true, proxy);
 }
 
 export async function authKeyAuth(
     clientName: string,
     authKey: string,
-    dc: string = '1'
+    dc: string = '1',
+    exchangeToHamsterToken: boolean,
+    proxy?: Proxy | null
 ) {
-    const tg = createTelegramClient(clientName);
+    const tg = createTelegramClient(clientName, proxy);
 
     await tg.importSession({
         authKey: new Uint8Array(Buffer.from(authKey, 'hex')),
@@ -126,16 +169,25 @@ export async function authKeyAuth(
         primaryDcs: DC_MAPPING_PROD[+dc],
     });
 
-    await tg.close();
-
-    console.log(`${clientName} | ${authKey} Auth key imported successfully`);
+    if (exchangeToHamsterToken) {
+        await exchangeTelegramForHamster(
+            tg,
+            clientName,
+            undefined,
+            true,
+            proxy
+        );
+    } else {
+        await tg.close();
+    }
 }
 
 export async function exchangeTelegramForHamster(
     tg: TelegramClient,
     clientName: string,
     referrer?: number,
-    saveToStorage = false
+    saveToStorage = false,
+    proxy: Proxy | null = null
 ) {
     const hamsterPeer = await tg.resolvePeer('hamster_kombat_bot');
     const hamsterUser = toInputUser(hamsterPeer);
@@ -160,22 +212,19 @@ export async function exchangeTelegramForHamster(
 
     const fingerprint = getRandomFingerprint();
 
-    const {
-        data: { authToken },
-    } = await hamsterKombatService.authByTelegramWebApp({
-        initDataRaw,
-        fingerprint,
-    });
+    const { authToken } = await authByTelegramWebApp(
+        {
+            initDataRaw,
+            fingerprint,
+        },
+        proxy
+    );
 
     if (referrer) {
-        await hamsterKombatService.addReferral(authToken, {
-            friendUserId: +referrer,
-        });
-
-        await hamsterKombatService.selectExchange(authToken, {
-            exchangeId: 'bybit',
-        });
+        await addReferral(authToken, proxy, +referrer);
     }
+
+    await selectExchange(authToken, proxy, 'bybit');
 
     if (saveToStorage) {
         storage.update(async (data) => {
@@ -186,13 +235,14 @@ export async function exchangeTelegramForHamster(
                     clientName,
                     fingerprint,
                     token: authToken,
+                    proxy,
                 },
             };
         });
     }
 }
 
-export function createTelegramClient(clientName: string) {
+export function createTelegramClient(clientName: string, proxy?: Proxy | null) {
     let opts: BaseTelegramClientOptions = {
         apiId: API_ID,
         apiHash: API_HASH,
@@ -207,7 +257,15 @@ export function createTelegramClient(clientName: string) {
         },
     };
 
-    if (process.env.PROXY_IP) {
+    if (proxy) {
+        opts.transport = () =>
+            new HttpProxyTcpTransport({
+                host: proxy.host,
+                port: proxy.port,
+                user: proxy.username,
+                password: proxy.password,
+            });
+    } else if (process.env.PROXY_IP) {
         opts.transport = () =>
             new HttpProxyTcpTransport({
                 host: process.env.PROXY_IP!,

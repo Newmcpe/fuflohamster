@@ -5,11 +5,19 @@ export type Config = {
     referralAccounts: string[];
 };
 
+export type Proxy = {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+};
+
 export type HamsterAccount = {
     token: string;
     clientName: string;
     fingerprint: Fingerprint;
     currentCooldowns: Cooldowns;
+    proxy: Proxy | null;
 };
 
 export type Cooldowns = {
@@ -33,4 +41,5 @@ export const defaultHamsterAccount = {
         noDailyComboUntil: 0,
         noDailyBonusUntil: 0,
     },
+    proxy: null,
 };

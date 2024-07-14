@@ -2,13 +2,13 @@ import { storage } from '../index.js';
 import { HamsterAccount } from '../util/config-schema.js';
 import { tap } from './tapper.js';
 import { dateNowInSeconds } from '../util/date.js';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 import { upgrader } from 'clicker-modules/upgrader.js';
 import { cipherClaimer } from 'clicker-modules/cipher.js';
 import { dailyComboClaimer } from 'clicker-modules/daily-combo.js';
 import { formatNumber } from 'util/number.js';
 import { dailyBonusCompleter } from 'clicker-modules/daily-bonus-completer.js';
+import { getProfileData } from 'api/hamster/hamster-kombat-service.js';
 
 const log = Logger.create('[HEARTBEAT]');
 
@@ -16,7 +16,9 @@ export async function startHeartbeat() {
     for (const account of Object.values(storage.data.accounts)) {
         const {
             data: { clickerUser },
-        } = await hamsterKombatService.getProfileData(account.token);
+        } = await getProfileData(account);
+
+        log.info(clickerUser);
 
         log.info(
             Logger.color(account.clientName, Color.Cyan),

@@ -1,13 +1,3 @@
-import {
-    BasePath,
-    BaseService,
-    Body,
-    Header,
-    POST,
-    Response,
-    ServiceBuilder,
-} from 'retrofit-axios-ts';
-
 import { Fingerprint } from 'util/fingerprint.js';
 import {
     AvailableBoostsResponse,
@@ -15,173 +5,201 @@ import {
     ClickerGameConfig,
     HamsterProfile,
     MeTelegramResponse,
-    TokenResponse,
     TasksResponse,
+    TokenResponse,
 } from 'api/hamster/model.js';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { HamsterAccount, Proxy } from 'util/config-schema.js';
 
-@BasePath('')
-class HamsterKombatService extends BaseService {
-    @POST('auth/auth-by-telegram-webapp')
-    async authByTelegramWebApp(
-        @Body _body: { initDataRaw: string; fingerprint: Fingerprint }
-    ): Promise<Response<TokenResponse>> {
-        return {} as Response<TokenResponse>;
+const BASE_DOMAIN = 'https://api.hamsterkombatgame.io';
+
+export const authByTelegramWebApp = async (
+    body: {
+        initDataRaw: string;
+        fingerprint: Fingerprint;
+    },
+    proxy: Proxy | null
+): Promise<TokenResponse> =>
+    axios.post(
+        `${BASE_DOMAIN}/auth/auth-by-telegram-webapp`,
+        body,
+        proxy
+            ? {
+                  proxy: {
+                      host: proxy.host,
+                      port: proxy.port,
+                      auth: {
+                          username: proxy.username,
+                          password: proxy.password,
+                      },
+                  },
+              }
+            : {}
+    );
+
+export const getMeTelegram = async (
+    account: HamsterAccount
+): Promise<MeTelegramResponse> =>
+    axios.post(
+        `${BASE_DOMAIN}/auth/me-telegram`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const getProfileData = async (
+    account: HamsterAccount
+): Promise<AxiosResponse<HamsterProfile>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/sync`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const sendTaps = async (
+    account: HamsterAccount,
+    availableTaps: number,
+    count: number,
+    timestamp: number
+): Promise<AxiosResponse<HamsterProfile>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/tap`,
+        { availableTaps: availableTaps, count, timestamp },
+        buildConfigFromAccount(account)
+    );
+
+export const addReferral = async (
+    token: string,
+    proxy: Proxy | null,
+    friendUserId: number
+): Promise<AxiosResponse<string>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/add-referral`,
+        { friendUserId },
+        buildConfig(proxy, token)
+    );
+
+export const selectExchange = async (
+    token: string,
+    proxy: Proxy | null,
+    exchangeId: string
+): Promise<AxiosResponse<string>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/select-exchange`,
+        { exchangeId },
+        buildConfig(proxy, token)
+    );
+
+export const getUpgradesForBuy = async (
+    account: HamsterAccount
+): Promise<AxiosResponse<AvailableUpgradesResponse>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/upgrades-for-buy`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const buyUpgrade = async (
+    account: HamsterAccount,
+    upgradeId: string,
+    timestamp: number
+): Promise<AxiosResponse<AvailableUpgradesResponse>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/buy-upgrade`,
+        { upgradeId, timestamp },
+        buildConfigFromAccount(account)
+    );
+
+export const getConfig = async (
+    account: HamsterAccount
+): Promise<AxiosResponse<ClickerGameConfig>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/config`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const claimDailyCipher = async (
+    account: HamsterAccount,
+    cipher: string
+): Promise<AxiosResponse<ClickerGameConfig>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/claim-daily-cipher`,
+        { cipher },
+        buildConfigFromAccount(account)
+    );
+
+export const claimDailyCombo = async (account: HamsterAccount): Promise<void> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/claim-daily-combo`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const getBoosts = async (
+    account: HamsterAccount
+): Promise<AxiosResponse<AvailableBoostsResponse>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/boosts-for-buy`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const listTasks = async (
+    account: HamsterAccount
+): Promise<AxiosResponse<TasksResponse>> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/list-tasks`,
+        {},
+        buildConfigFromAccount(account)
+    );
+
+export const applyBoost = async (
+    account: HamsterAccount,
+    boostId: string,
+    timestamp: number
+): Promise<void> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/buy-boost`,
+        { boostId, timestamp },
+        buildConfigFromAccount(account)
+    );
+
+export const checkTask = async (
+    account: HamsterAccount,
+    taskId: string
+): Promise<void> =>
+    axios.post(
+        `${BASE_DOMAIN}/clicker/check-task`,
+        { taskId },
+        buildConfigFromAccount(account)
+    );
+
+const buildConfigFromAccount = (account: HamsterAccount): AxiosRequestConfig =>
+    buildConfig(account.proxy, account.token);
+
+const buildConfig = (
+    proxy: Proxy | null,
+    token: string
+): AxiosRequestConfig => {
+    let config: AxiosRequestConfig = {};
+    if (proxy) {
+        config = {
+            proxy: {
+                host: proxy.host,
+                port: proxy.port,
+                auth: {
+                    username: proxy.username,
+                    password: proxy.password,
+                },
+            },
+        };
     }
 
-    @POST('auth/me-telegram')
-    async getMeTelegram(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') _token: string
-    ): Promise<Response<MeTelegramResponse>> {
-        return {} as Response<MeTelegramResponse>;
+    if (token) {
+        config.headers = {
+            Authorization: `Bearer ${token}`,
+        };
     }
 
-    @POST('clicker/sync', {})
-    async getProfileData(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') _token: string
-    ): Promise<Response<HamsterProfile>> {
-        return {} as Response<HamsterProfile>;
-    }
-
-    @POST('clicker/tap')
-    async tap(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            availableTaps: number;
-            count: number;
-            timestamp: number;
-        }
-    ): Promise<Response<HamsterProfile>> {
-        return {} as Response<HamsterProfile>;
-    }
-
-    @POST('clicker/add-referral')
-    async addReferral(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            friendUserId: number;
-        }
-    ): Promise<Response<string>> {
-        return {} as Response<string>;
-    }
-
-    @POST('clicker/select-exchange')
-    async selectExchange(
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            exchangeId: string;
-        }
-    ): Promise<Response<string>> {
-        return {} as Response<string>;
-    }
-
-    @POST('clicker/upgrades-for-buy')
-    async getUpgradesForBuy(
-        @Header('Authorization') _token: string
-    ): Promise<Response<AvailableUpgradesResponse>> {
-        return {} as Response<AvailableUpgradesResponse>;
-    }
-
-    @POST('clicker/buy-upgrade')
-    async buyUpgrade(
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            timestamp: number;
-            upgradeId: string;
-        }
-    ): Promise<Response<AvailableUpgradesResponse>> {
-        return {} as Response<AvailableUpgradesResponse>;
-    }
-
-    @POST('clicker/config')
-    async getConfig(
-        @Header('Authorization') _token: string
-    ): Promise<Response<ClickerGameConfig>> {
-        return {} as Response<ClickerGameConfig>;
-    }
-
-    @POST('clicker/claim-daily-cipher')
-    async claimDailyCipher(
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            cipher: string;
-        }
-    ): Promise<Response<ClickerGameConfig>> {
-        return {} as Response<ClickerGameConfig>;
-    }
-
-    @POST('clicker/claim-daily-combo')
-    async claimDailyCombo(
-        @Header('Authorization') _token: string
-    ): Promise<Response<void>> {
-        return {} as Response<void>;
-    }
-
-    @POST('clicker/boosts-for-buy')
-    async getBoosts(
-        @Header('Authorization') _token: string
-    ): Promise<Response<AvailableBoostsResponse>> {
-        return {} as Response<AvailableBoostsResponse>;
-    }
-
-    @POST('clicker/list-tasks')
-    async listTasks(
-        @Header('Authorization') _token: string
-    ): Promise<Response<TasksResponse>> {
-        return {} as Response<TasksResponse>;
-    }
-
-    @POST('clicker/buy-boost')
-    async applyBoost(
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            timestamp: number;
-            boostId: string;
-        }
-    ): Promise<Response<void>> {
-        return {} as Response<void>;
-    }
-
-    @POST('clicker/check-task')
-    async checkTask(
-        @Header('Authorization') _token: string,
-        @Body
-        _: {
-            taskId: string;
-        }
-    ): Promise<Response<void>> {
-        return {} as Response<void>;
-    }
-}
-
-export const hamsterKombatService = new ServiceBuilder()
-    .setEndpoint('https://api.hamsterkombat.io/')
-    .setRequestInterceptors({
-        fulfilled: (config) => {
-            config.headers!.Authorization = `Bearer ${config.headers!!.Authorization}`;
-
-            return config;
-        },
-        rejected: (e) => {
-            console.log('Request interceptor error.');
-            return Promise.resolve();
-        },
-    })
-    .setResponseInterceptors({
-        fulfilled: (config) => {
-            config.headers!.Authorization = `Bearer ${config.headers!!.Authorization}`;
-
-            return config;
-        },
-    })
-    .setStandalone(true)
-    .build(HamsterKombatService);
+    return config;
+};

@@ -1,9 +1,14 @@
 import { HamsterAccount } from 'util/config-schema.js';
 import { Color, Logger } from '@starkow/logger';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { DailyCombo } from 'api/hamster/model.js';
 import { isCooldownOver, setCooldown } from 'clicker-modules/heartbeat.js';
 import { formatNumber } from 'util/number.js';
+import {
+    buyUpgrade,
+    claimDailyCombo,
+    getProfileData,
+    getUpgradesForBuy,
+} from 'api/hamster/hamster-kombat-service.js';
 
 const log = Logger.create('[DAILY-COMBO]');
 
@@ -16,13 +21,13 @@ export async function dailyComboClaimer(account: HamsterAccount) {
 
     let {
         data: { upgradesForBuy, dailyCombo },
-    } = await hamsterKombatService.getUpgradesForBuy(account.token);
+    } = await getUpgradesForBuy(account);
 
     if (dailyCombo.isClaimed) return;
 
     const {
         data: { clickerUser },
-    } = await hamsterKombatService.getProfileData(account.token);
+    } = await getProfileData(account);
     const { combo: revealedDailyCombo } = await fetchDailyCombo();
 
     upgradesForBuy = upgradesForBuy.filter(
@@ -76,14 +81,11 @@ export async function dailyComboClaimer(account: HamsterAccount) {
     }
 
     for (const upgrade of upgradesForBuy) {
-        await hamsterKombatService.buyUpgrade(account.token, {
-            timestamp: Date.now(),
-            upgradeId: upgrade.id,
-        });
+        await buyUpgrade(account, upgrade.id, Date.now());
         clickerUser.balanceCoins -= upgrade.price;
     }
 
-    await hamsterKombatService.claimDailyCombo(account.token);
+    await claimDailyCombo(account);
 
     log.info(
         Logger.color(account.clientName, Color.Cyan),

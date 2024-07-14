@@ -8,9 +8,6 @@ import {
 import enquirer from 'enquirer';
 import { Color, Logger } from '@starkow/logger';
 import { storage } from 'index.js';
-import { API_HASH, API_ID } from 'env.js';
-import { HttpProxyTcpTransport } from '@mtcute/http-proxy';
-import { TelegramClient } from '@mtcute/node';
 
 const log = Logger.create('[Referrals]');
 
@@ -32,7 +29,7 @@ export async function setupReferralAccounts() {
 
         lines.forEach(async (line) => {
             const clientName = uuidv4();
-            await authKeyAuth(clientName, line, dc);
+            await authKeyAuth(clientName, line, dc, false, null);
 
             storage.update((data) => {
                 data.referralAccounts.push(clientName);

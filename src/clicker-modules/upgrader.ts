@@ -1,22 +1,24 @@
 import { HamsterAccount } from '../util/config-schema.js';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
 import { Color, Logger } from '@starkow/logger';
 import { isCooldownOver, setCooldown } from 'clicker-modules/heartbeat.js';
 import { formatNumber } from 'util/number.js';
 import { Upgrade } from 'api/hamster/model.js';
+import {
+    buyUpgrade,
+    getProfileData,
+    getUpgradesForBuy,
+} from 'api/hamster/hamster-kombat-service.js';
 
 const log = Logger.create('[Upgrader] ');
 
 export async function upgrader(account: HamsterAccount) {
     if (!isCooldownOver('noUpgradesUntil', account)) return;
 
-    const { data: profile } = await hamsterKombatService.getProfileData(
-        account.token
-    );
+    let { data: profile } = await getProfileData(account);
 
     let {
         data: { upgradesForBuy },
-    } = await hamsterKombatService.getUpgradesForBuy(account.token);
+    } = await getUpgradesForBuy(account);
 
     const bestUpgrade: Upgrade | null = upgradesForBuy
         .filter(
@@ -48,10 +50,7 @@ export async function upgrader(account: HamsterAccount) {
         return;
     }
 
-    await hamsterKombatService.buyUpgrade(account.token, {
-        timestamp: Date.now(),
-        upgradeId: bestUpgrade!.id,
-    });
+    await buyUpgrade(account, bestUpgrade!.id, Date.now());
 
     profile.clickerUser.balanceCoins -= bestUpgrade!.price;
 

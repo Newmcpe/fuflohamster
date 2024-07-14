@@ -1,6 +1,6 @@
 import { Color, Logger } from '@starkow/logger';
 import { HamsterAccount } from 'util/config-schema.js';
-import { hamsterKombatService } from 'api/hamster/hamster-kombat-service.js';
+import { checkTask, listTasks } from 'api/hamster/hamster-kombat-service.js';
 import { setCooldown } from 'clicker-modules/heartbeat.js';
 
 const log = Logger.create('[Streak Completor] ');
@@ -8,7 +8,7 @@ const log = Logger.create('[Streak Completor] ');
 export async function dailyBonusCompleter(account: HamsterAccount) {
     const {
         data: { tasks },
-    } = await hamsterKombatService.listTasks(account.token);
+    } = await listTasks(account);
 
     const streakDaysTask = tasks.find((task) => task.id === 'streak_days')!;
 
@@ -17,9 +17,7 @@ export async function dailyBonusCompleter(account: HamsterAccount) {
         return;
     }
 
-    await hamsterKombatService.checkTask(account.token, {
-        taskId: streakDaysTask.id,
-    });
+    await checkTask(account, streakDaysTask.id);
 
     log.info(
         Logger.color(account.clientName, Color.Cyan),
