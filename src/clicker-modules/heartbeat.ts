@@ -18,8 +18,6 @@ export async function startHeartbeat() {
             data: { clickerUser },
         } = await getProfileData(account);
 
-        log.info(clickerUser);
-
         log.info(
             Logger.color(account.clientName, Color.Cyan),
             Logger.color('|', Color.Gray),

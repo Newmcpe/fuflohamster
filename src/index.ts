@@ -3,12 +3,7 @@ import { JSONFileSyncPreset } from 'lowdb/node';
 import { setupNewAccount } from './onboarding.js';
 import { Config, defaultConfig } from './util/config-schema.js';
 import { startHeartbeat } from './clicker-modules/heartbeat.js';
-import {
-    addReferals,
-    addReferalsPrompt,
-    setupReferralAccounts,
-} from 'referrals.js';
-import { startTelegramPanel } from 'telegram-panel/telegram-panel.js';
+import { addReferalsPrompt, setupReferralAccounts } from 'referrals.js';
 import axios from 'axios';
 
 export const storage = JSONFileSyncPreset<Config>('config.json', defaultConfig);
@@ -24,7 +19,7 @@ axios.interceptors.response.use(
     function (error) {
         // Any status codes that falls outside the range of 2xx cause this function to trigger
         // Do something with response error
-        return Promise.reject(error);
+        return Promise.resolve();
     }
 );
 
