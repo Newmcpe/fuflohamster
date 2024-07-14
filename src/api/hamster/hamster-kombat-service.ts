@@ -185,6 +185,7 @@ const buildConfig = (
     if (proxy) {
         config = {
             proxy: {
+                protocol: 'http',
                 host: proxy.host,
                 port: proxy.port,
                 auth: {
