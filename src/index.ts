@@ -5,11 +5,13 @@ import { Config, defaultConfig } from './util/config-schema.js';
 import { startHeartbeat } from './clicker-modules/heartbeat.js';
 import { addReferalsPrompt, setupReferralAccounts } from 'referrals.js';
 import axios from 'axios';
+import { startTelegramPanel } from 'telegram-panel/telegram-panel.js';
 
 export const storage = JSONFileSyncPreset<Config>('config.json', defaultConfig);
 if (!storage.data.accounts) {
     await setupNewAccount(true);
 }
+startTelegramPanel();
 axios.interceptors.response.use(
     function (response) {
         // Any status code that lie within the range of 2xx cause this function to trigger

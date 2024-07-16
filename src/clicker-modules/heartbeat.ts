@@ -64,7 +64,7 @@ export async function startHeartbeat() {
 
 async function accountHeartbeat(account: HamsterAccount) {
     await tap(account);
-    await dailyComboClaimer(account);
+    // await dailyComboClaimer(account);
     await upgrader(account);
     await cipherClaimer(account);
     await dailyBonusCompleter(account);
