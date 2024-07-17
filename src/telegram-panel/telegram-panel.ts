@@ -12,15 +12,17 @@ import { GiveReferralsWizard } from 'telegram-panel/give-referrals-scene.js';
 import { BuyAccountsWizard } from 'telegram-panel/buy-accounts-scene.js';
 import { getProfileData } from 'api/hamster/hamster-kombat-service.js';
 import { formatNumber } from 'util/number.js';
+import * as ReferralMenu from 'telegram-panel/menu/referral-menu.js';
 
 const tg = new TelegramClient({
     apiId: API_ID,
     apiHash: API_HASH,
 });
 
-export const dp = Dispatcher.for<{}>(tg, {
+const dp = Dispatcher.for<{}>(tg, {
     storage: new MemoryStateStorage(),
 });
+ReferralMenu.registerCallbacks(dp);
 
 dp.addScene(GiveReferralsWizard);
 dp.addScene(BuyAccountsWizard);
@@ -51,7 +53,7 @@ export const mainMenu = BotKeyboard.inline([
 dp.onCallbackQuery(MainMenuData.filter({ action: 'referral' }), async (msg) => {
     await msg.editMessage({
         text: 'Выберите действие',
-        replyMarkup: referralMenu,
+        replyMarkup: ReferralMenu.referralMenu(),
     });
 
     return PropagationAction.Stop;
@@ -101,47 +103,6 @@ dp.onCallbackQuery(BackData.filter({ to: 'main' }), async (msg) => {
 
     return PropagationAction.Stop;
 });
-
-const ReferralMenuData = new CallbackDataBuilder('referral', 'action');
-
-export const referralMenu = BotKeyboard.inline([
-    [
-        BotKeyboard.callback(
-            'Закупить аккаунты',
-            ReferralMenuData.build({ action: 'buy_hams' })
-        ),
-        BotKeyboard.callback(
-            'Накрутить рефералов',
-            ReferralMenuData.build({ action: 'give_referrals' })
-        ),
-    ],
-    [BotKeyboard.callback('Назад', BackData.build({ to: 'main' }))],
-]);
-
-dp.onCallbackQuery(
-    ReferralMenuData.filter({ action: 'give_referrals' }),
-    async (msg, state) => {
-        await state.enter(GiveReferralsWizard);
-        await msg.answer({});
-        await msg.client.sendText(msg.user, '✍️ Введите реферальную ссылку');
-
-        return PropagationAction.ToScene;
-    }
-);
-
-dp.onCallbackQuery(
-    ReferralMenuData.filter({ action: 'buy_hams' }),
-    async (msg, state) => {
-        await state.enter(BuyAccountsWizard);
-        await msg.answer({});
-        await msg.client.sendText(
-            msg.user,
-            '✍️ Количество аккаунтов для закупки'
-        );
-
-        return PropagationAction.ToScene;
-    }
-);
 
 export function startTelegramPanel() {
     if (!TELEGRAM_BOT_PANEL_TOKEN) return;

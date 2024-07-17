@@ -2,7 +2,7 @@ import { filters, WizardScene, WizardSceneAction } from '@mtcute/dispatcher';
 import { addReferals, extractReferralId } from 'referrals.js';
 import { storage } from 'index.js';
 import { BotKeyboard } from '@mtcute/node';
-import { referralMenu } from 'telegram-panel/telegram-panel.js';
+import { referralMenu } from 'telegram-panel/menu/referral-menu.js';
 
 interface ReferralAddForm {
     targetLink: number;
@@ -37,7 +37,7 @@ GiveReferralsWizard.onCallbackQuery(
     async (upd, state) => {
         await upd.editMessage({
             text: 'Выберите действие',
-            replyMarkup: referralMenu,
+            replyMarkup: referralMenu(),
         });
         await upd.client.sendText(upd.user, '❌ Действие отменено');
         await state.exit();
@@ -66,7 +66,7 @@ GiveReferralsWizard.addStep(async (msg, state) => {
     await msg.replyText(
         `✅ Успешно добавлено ${successfulCount} из ${count} рефералов для ${targetId}`,
         {
-            replyMarkup: referralMenu,
+            replyMarkup: referralMenu(),
         }
     );
 
