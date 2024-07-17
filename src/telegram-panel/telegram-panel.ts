@@ -10,19 +10,29 @@ import {
 import { storage } from 'index.js';
 import { GiveReferralsWizard } from 'telegram-panel/give-referrals-scene.js';
 import { BuyAccountsWizard } from 'telegram-panel/buy-accounts-scene.js';
-import { formatNumber } from 'util/number.js';
 import { getProfileData } from 'api/hamster/hamster-kombat-service.js';
+import { formatNumber } from 'util/number.js';
 
 const tg = new TelegramClient({
     apiId: API_ID,
     apiHash: API_HASH,
 });
 
-const dp = Dispatcher.for<{}>(tg, {
+export const dp = Dispatcher.for<{}>(tg, {
     storage: new MemoryStateStorage(),
 });
 
-const BackData = new CallbackDataBuilder('back', 'to');
+dp.addScene(GiveReferralsWizard);
+dp.addScene(BuyAccountsWizard);
+
+dp.onNewMessage(filters.command('start'), async (msg) => {
+    await msg.answerText(
+        `🧾 Доступное количество рефералов: ${storage.data.referralAccounts.length}`,
+        {
+            replyMarkup: mainMenu,
+        }
+    );
+});
 
 const MainMenuData = new CallbackDataBuilder('main', 'action');
 export const mainMenu = BotKeyboard.inline([
@@ -38,33 +48,6 @@ export const mainMenu = BotKeyboard.inline([
     ],
 ]);
 
-const ReferralMenuData = new CallbackDataBuilder('referral', 'action');
-export const referralMenu = BotKeyboard.inline([
-    [
-        BotKeyboard.callback(
-            'Закупить аккаунты',
-            ReferralMenuData.build({ action: 'buy_hams' })
-        ),
-        BotKeyboard.callback(
-            'Накрутить рефералов',
-            ReferralMenuData.build({ action: 'give_referrals' })
-        ),
-    ],
-    [BotKeyboard.callback('Назад', BackData.build({ to: 'main' }))],
-]);
-
-dp.addScene(GiveReferralsWizard);
-dp.addScene(BuyAccountsWizard);
-
-dp.onNewMessage(filters.command('start'), async (msg) => {
-    await msg.answerText(
-        `🧾 Доступное количество рефералов: ${storage.data.referralAccounts.length}`,
-        {
-            replyMarkup: mainMenu,
-        }
-    );
-});
-
 dp.onCallbackQuery(MainMenuData.filter({ action: 'referral' }), async (msg) => {
     await msg.editMessage({
         text: 'Выберите действие',
@@ -78,43 +61,6 @@ dp.onCallbackQuery(MainMenuData.filter({ action: 'accounts' }), async (msg) => {
     await msg.answer({
         text: '',
     });
-
-    //for (const account of Object.values(storage.data.accounts)) {
-    //         const {
-    //             data: { clickerUser },
-    //         } = await getProfileData(account);
-    //
-    //         log.info(
-    //             Logger.color(account.clientName, Color.Cyan),
-    //             Logger.color('|', Color.Gray),
-    //             'Последний пассивный заработок:',
-    //             Logger.color(
-    //                 `${formatNumber(clickerUser.lastPassiveEarn)} 🪙`,
-    //                 Color.Magenta
-    //             ),
-    //             Logger.color('|', Color.Gray),
-    //             'Доход:',
-    //             Logger.color(
-    //                 `${formatNumber(clickerUser.earnPassivePerHour)} 🪙/ч.\n`,
-    //                 Color.Magenta
-    //             ),
-    //             Logger.color('|', Color.Gray),
-    //             'Баланс:',
-    //             Logger.color(formatNumber(clickerUser.balanceCoins), Color.Magenta),
-    //             '🪙',
-    //             Logger.color('|', Color.Gray),
-    //             'Текущий уровень:',
-    //             Logger.color(clickerUser.level.toString(), Color.Magenta),
-    //             Logger.color('|', Color.Gray),
-    //             'Количество рефералов:',
-    //             Logger.color(clickerUser.referralsCount.toString(), Color.Magenta),
-    //             Logger.color('|', Color.Gray),
-    //             'Стоимость аккаунта:',
-    //             Logger.color(formatNumber(clickerUser.totalCoins), Color.Magenta)
-    //         );
-    //
-    //         await accountHeartbeat(account);
-    //     }
     const accounts = Object.values(storage.data.accounts);
 
     let accountsStatsText = '';
@@ -145,6 +91,33 @@ dp.onCallbackQuery(MainMenuData.filter({ action: 'accounts' }), async (msg) => {
     return PropagationAction.Stop;
 });
 
+export const BackData = new CallbackDataBuilder('back', 'to');
+
+dp.onCallbackQuery(BackData.filter({ to: 'main' }), async (msg) => {
+    await msg.editMessage({
+        text: 'Выберите действие',
+        replyMarkup: mainMenu,
+    });
+
+    return PropagationAction.Stop;
+});
+
+const ReferralMenuData = new CallbackDataBuilder('referral', 'action');
+
+export const referralMenu = BotKeyboard.inline([
+    [
+        BotKeyboard.callback(
+            'Закупить аккаунты',
+            ReferralMenuData.build({ action: 'buy_hams' })
+        ),
+        BotKeyboard.callback(
+            'Накрутить рефералов',
+            ReferralMenuData.build({ action: 'give_referrals' })
+        ),
+    ],
+    [BotKeyboard.callback('Назад', BackData.build({ to: 'main' }))],
+]);
+
 dp.onCallbackQuery(
     ReferralMenuData.filter({ action: 'give_referrals' }),
     async (msg, state) => {
@@ -169,15 +142,6 @@ dp.onCallbackQuery(
         return PropagationAction.ToScene;
     }
 );
-
-dp.onCallbackQuery(BackData.filter({ to: 'main' }), async (msg) => {
-    await msg.editMessage({
-        text: 'Выберите действие',
-        replyMarkup: mainMenu,
-    });
-
-    return PropagationAction.Stop;
-});
 
 export function startTelegramPanel() {
     if (!TELEGRAM_BOT_PANEL_TOKEN) return;
