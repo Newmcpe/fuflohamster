@@ -9,7 +9,7 @@ import { ItemData } from 'api/lzt/model.js';
 import { authKeyAuth } from 'onboarding.js';
 import { storage } from 'index.js';
 import { BotKeyboard } from '@mtcute/node';
-import { defaultMenu } from 'telegram-panel/telegram-panel.js';
+import { referralMenu } from 'telegram-panel/telegram-panel.js';
 
 interface BuyAccountsForm {
     count: number;
@@ -47,7 +47,7 @@ BuyAccountsWizard.onCallbackQuery(
     async (upd, state) => {
         await upd.editMessage({
             text: 'Выберите действие',
-            replyMarkup: defaultMenu,
+            replyMarkup: referralMenu,
         });
         await state.exit();
     }
@@ -146,6 +146,6 @@ async function buyAccounts(itemsToBuy: ItemData[], msg: MessageContext) {
     }
 
     await msg.answerText('Выберите действие', {
-        replyMarkup: defaultMenu,
+        replyMarkup: referralMenu,
     });
 }

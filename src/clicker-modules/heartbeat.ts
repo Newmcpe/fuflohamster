@@ -47,27 +47,27 @@ export async function startHeartbeat() {
             Logger.color(formatNumber(clickerUser.totalCoins), Color.Magenta)
         );
 
-        try {
-            await accountHeartbeat(account);
-        } catch (e) {
-            log.error(
-                Logger.color(account.clientName, Color.Cyan),
-                Logger.color('|', Color.Gray),
-                'Ошибка при обновлении аккаунта:',
-                e
-            );
-        }
+        await accountHeartbeat(account);
     }
 }
 
 async function accountHeartbeat(account: HamsterAccount) {
-    await tap(account);
-    await dailyComboClaimer(account);
-    await upgrader(account);
-    await cipherClaimer(account);
-    await dailyBonusCompleter(account);
+    try {
+        await tap(account);
+        await dailyComboClaimer(account);
+        await upgrader(account);
+        await cipherClaimer(account);
+        await dailyBonusCompleter(account);
 
-    setTimeout(accountHeartbeat, 1000, account);
+        setTimeout(accountHeartbeat, 1000, account);
+    } catch (e) {
+        log.error(
+            Logger.color(account.clientName, Color.Cyan),
+            Logger.color('|', Color.Gray),
+            'Ошибка при обновлении аккаунта:',
+            e
+        );
+    }
 }
 
 export function isCooldownOver(
