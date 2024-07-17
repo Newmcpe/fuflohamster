@@ -12,10 +12,6 @@ const GiveReferralsWizard = new WizardScene<ReferralAddForm>(
     'referrals_add_form'
 );
 
-//regex for https://t.me/hamster_Kombat_bot/start?startapp=kentId1449892902; hamster_Kombat_bot letter case is not important
-const referralLinkRegex =
-    /https:\/\/t.me\/hamster_kombat_bot\/start\?startapp=\d+/gi;
-
 GiveReferralsWizard.addStep(async (msg, state) => {
     if (msg.text.length < 3) {
         await msg.replyText('Неверная ссылка', {
