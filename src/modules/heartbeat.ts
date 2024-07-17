@@ -3,11 +3,11 @@ import { HamsterAccount } from '../util/config-schema.js';
 import { tap } from './tapper.js';
 import { dateNowInSeconds } from '../util/date.js';
 import { Color, Logger } from '@starkow/logger';
-import { upgrader } from 'clicker-modules/upgrader.js';
-import { cipherClaimer } from 'clicker-modules/cipher.js';
-import { dailyComboClaimer } from 'clicker-modules/daily-combo.js';
+import { upgrader } from 'modules/upgrader.js';
+import { cipherClaimer } from 'modules/cipher.js';
+import { dailyComboClaimer } from 'modules/daily-combo.js';
 import { formatNumber } from 'util/number.js';
-import { dailyBonusCompleter } from 'clicker-modules/daily-bonus-completer.js';
+import { autoTasksCompleter } from 'modules/auto-tasks-completer.js';
 import { getProfileData } from 'api/hamster/hamster-kombat-service.js';
 
 const log = Logger.create('[HEARTBEAT]');
@@ -57,7 +57,7 @@ async function accountHeartbeat(account: HamsterAccount) {
         await dailyComboClaimer(account);
         await upgrader(account);
         await cipherClaimer(account);
-        await dailyBonusCompleter(account);
+        await autoTasksCompleter(account);
 
         setTimeout(accountHeartbeat, 1000, account);
     } catch (e) {

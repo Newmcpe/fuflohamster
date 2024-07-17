@@ -2,7 +2,7 @@ import enquirer from 'enquirer';
 import { JSONFileSyncPreset } from 'lowdb/node';
 import { setupNewAccount } from './onboarding.js';
 import { Config, defaultConfig } from './util/config-schema.js';
-import { startHeartbeat } from './clicker-modules/heartbeat.js';
+import { startHeartbeat } from 'modules/heartbeat.js';
 import { addReferalsPrompt, setupReferralAccounts } from 'referrals.js';
 import axios from 'axios';
 import { startTelegramPanel } from 'telegram-panel/telegram-panel.js';
@@ -21,6 +21,7 @@ axios.interceptors.response.use(
     function (error) {
         // Any status codes that falls outside the range of 2xx cause this function to trigger
         // Do something with response error
+        console.error(error);
         return Promise.resolve();
     }
 );

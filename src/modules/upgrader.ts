@@ -1,6 +1,6 @@
 import { HamsterAccount } from '../util/config-schema.js';
 import { Color, Logger } from '@starkow/logger';
-import { isCooldownOver, setCooldown } from 'clicker-modules/heartbeat.js';
+import { isCooldownOver, setCooldown } from 'modules/heartbeat.js';
 import { formatNumber } from 'util/number.js';
 import { Upgrade } from 'api/hamster/model.js';
 import {
