@@ -12,8 +12,6 @@
         "build": "tsc && tsc-alias"
     },
     "dependencies": {
-        "@grammyjs/conversations": "^1.2.0",
-        "@grammyjs/menu": "^1.2.1",
         "@lolzteam/sdk": "^0.2.6",
         "@mtcute/convert": "^0.13.0",
         "@mtcute/crypto-node": "^0.13.0",
@@ -23,7 +21,6 @@
         "@starkow/logger": "^2.3.1",
         "axios": "^1.7.2",
         "enquirer": "^2.4.1",
-        "grammy": "^1.25.1",
         "long": "^5.2.3",
         "lowdb": "^7.0.1",
         "random": "^4.1.0",

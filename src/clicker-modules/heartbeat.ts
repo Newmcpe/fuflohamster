@@ -58,13 +58,13 @@ export async function startHeartbeat() {
                     e
                 );
             }
-        }, 5000);
+        }, 1000);
     }
 }
 
 async function accountHeartbeat(account: HamsterAccount) {
     await tap(account);
-    // await dailyComboClaimer(account);
+    await dailyComboClaimer(account);
     await upgrader(account);
     await cipherClaimer(account);
     await dailyBonusCompleter(account);
