@@ -58,8 +58,6 @@ async function accountHeartbeat(account: HamsterAccount) {
         await upgrader(account);
         await cipherClaimer(account);
         await autoTasksCompleter(account);
-
-        setTimeout(accountHeartbeat, 1000, account);
     } catch (e) {
         log.error(
             Logger.color(account.clientName, Color.Cyan),
@@ -67,6 +65,8 @@ async function accountHeartbeat(account: HamsterAccount) {
             'Ошибка при обновлении аккаунта:',
             e
         );
+    } finally {
+        setTimeout(accountHeartbeat, 1000, account);
     }
 }
 
