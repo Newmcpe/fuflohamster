@@ -61,7 +61,12 @@ export async function tap(account: HamsterAccount) {
 
     const {
         data: { clickerUser: newClickerUser },
-    } = await sendTaps(account, availableTaps, taps, Date.now());
+    } = await sendTaps(
+        account,
+        clickerUser.availableTaps - taps,
+        taps,
+        Date.now()
+    );
 
     const sleepTime = random.int(5, 25);
 
